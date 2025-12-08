@@ -1,0 +1,20 @@
+/* 优化文章封面图显示 - 针对Anzhiyu主题 */
+.post-bg {
+    border-radius: 12px !important; /* 添加圆角 */
+    overflow: hidden !important; /* 确保圆角生效 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important; /* 添加轻微阴影 */
+}
+/* 核心：取消强制正方形裁剪，改为按比例显示 */
+.post-cover {
+    width: 100% !important;
+    height: auto !important; /* 高度自适应 */
+    aspect-ratio: unset !important; /* 取消固定的宽高比 */
+    max-height: 280px !important; /* 设置最大高度，可根据喜好调整 */
+    object-fit: cover !important; /* 仍然用‘覆盖’模式，但比例正常了 */
+}
+/* 如果主题用了其他类名，也一并覆盖 */
+img.post-cover, .post-cover img {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: unset !important;
+}
