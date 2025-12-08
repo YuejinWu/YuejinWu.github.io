@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>AI Platform部分技术栈</title>
+      <link href="/2025/12/08/AIpiatform_%E6%8A%80%E6%9C%AF%E6%A0%88/"/>
+      <url>/2025/12/08/AIpiatform_%E6%8A%80%E6%9C%AF%E6%A0%88/</url>
+      
+        <content type="html"><![CDATA[<hr><p>以下是为我<strong>零基础新手</strong>量身定制的<strong>容器平台技术栈学习路线</strong>。</p><hr><h2 id="🎯-零基础学习路线图（总览）"><a href="#🎯-零基础学习路线图（总览）" class="headerlink" title="🎯 零基础学习路线图（总览）"></a>🎯 <strong>零基础学习路线图（总览）</strong></h2><p><strong>预计周期：3-4个月（按每周10小时学习时间）</strong></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">第一阶段：基础认知与Linux (1-2周)</span><br><span class="line">第二阶段：Docker核心技能 (3-4周)  </span><br><span class="line">第三阶段：存储与网络基础 (2-3周)</span><br><span class="line">第四阶段：平台实战与理解 (2-3周)</span><br><span class="line">第五阶段：扩展与进阶 (持续学习)</span><br></pre></td></tr></table></figure><hr><h2 id="📘-第一阶段：基础认知与Linux-1-2周"><a href="#📘-第一阶段：基础认知与Linux-1-2周" class="headerlink" title="📘 第一阶段：基础认知与Linux (1-2周)"></a>📘 <strong>第一阶段：基础认知与Linux (1-2周)</strong></h2><h3 id="目标：建立计算机基础认知，学会基本的Linux操作"><a href="#目标：建立计算机基础认知，学会基本的Linux操作" class="headerlink" title="目标：建立计算机基础认知，学会基本的Linux操作"></a><strong>目标</strong>：建立计算机基础认知，学会基本的Linux操作</h3><p><strong>学习内容</strong>：</p><ol><li><p><strong>计算机基础概念</strong></p><ul><li>什么是操作系统、进程、内存、硬盘</li><li>什么是IP地址、端口、网络协议</li><li>[B站搜索]：“计算机基础入门” 系列视频</li></ul></li><li><p><strong>Linux基础命令（最重要！）</strong></p><ul><li>如何在命令行中移动、查看文件</li><li>如何安装软件、管理权限</li><li><strong>推荐学习资源</strong>：<ul><li>[B站]：搜索“Linux基础命令10小时”</li><li>[网站]：菜鸟教程Linux教程</li><li><strong>动手练习</strong>：在Windows上安装WSL2，或Mac使用终端</li></ul></li></ul></li></ol><p><strong>每日任务示例</strong>：</p><ul><li>Day1：学习 <code>ls</code>, <code>cd</code>, <code>pwd</code> 命令</li><li>Day2：学习 <code>mkdir</code>, <code>rm</code>, <code>cp</code> 命令</li><li>Day3：学习 <code>cat</code>, <code>vim</code>, <code>nano</code> 编辑文件</li><li>Day4：学习 <code>ps</code>, <code>top</code> 查看进程</li><li>Day5：学习 <code>chmod</code>, <code>chown</code> 权限管理</li></ul><hr><h2 id="🐳-第二阶段：Docker核心技能-3-4周"><a href="#🐳-第二阶段：Docker核心技能-3-4周" class="headerlink" title="🐳 第二阶段：Docker核心技能 (3-4周)"></a>🐳 <strong>第二阶段：Docker核心技能 (3-4周)</strong></h2><h3 id="目标：掌握Docker基本使用，理解容器概念"><a href="#目标：掌握Docker基本使用，理解容器概念" class="headerlink" title="目标：掌握Docker基本使用，理解容器概念"></a><strong>目标</strong>：掌握Docker基本使用，理解容器概念</h3><p><strong>学习路径</strong>：</p><ol><li><p><strong>Docker是什么？（第1周）</strong></p><ul><li>看这个视频：[B站]“Docker通俗易懂解释”</li><li>安装Docker Desktop（Windows&#x2F;Mac一键安装）</li><li>运行第一个容器：<code>docker run hello-world</code></li></ul></li><li><p><strong>Docker基础操作（第2周）</strong></p><ul><li>学习核心命令：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker pull     # 下载镜像</span><br><span class="line">docker run      # 运行容器</span><br><span class="line">docker ps       # 查看运行中的容器</span><br><span class="line">docker stop     # 停止容器</span><br><span class="line">docker rm       # 删除容器</span><br><span class="line">docker images   # 查看镜像</span><br></pre></td></tr></table></figure></li><li>完成一个小练习：用Docker运行一个Nginx网站</li></ul></li><li><p><strong>Dockerfile与镜像制作（第3周）</strong></p><ul><li>理解镜像和容器的关系</li><li>学习编写简单的Dockerfile</li><li>自己制作一个包含Python环境的镜像</li></ul></li><li><p><strong>数据持久化（第4周）</strong></p><ul><li>理解Volume的概念</li><li>学习将本地文件夹挂载到容器内</li><li>练习：创建一个MySQL容器，将数据保存在本地</li></ul></li></ol><p><strong>推荐资源</strong>：</p><ul><li>[视频]：B站“Docker入门到实战”</li><li>[交互式学习]：Docker官方教程（有中文）</li><li>[书籍]：《Docker入门与实践》（电子版）</li></ul><hr><h2 id="💾-第三阶段：存储与网络基础-2-3周"><a href="#💾-第三阶段：存储与网络基础-2-3周" class="headerlink" title="💾 第三阶段：存储与网络基础 (2-3周)"></a>💾 <strong>第三阶段：存储与网络基础 (2-3周)</strong></h2><h3 id="目标：理解平台中的存储和网络设计"><a href="#目标：理解平台中的存储和网络设计" class="headerlink" title="目标：理解平台中的存储和网络设计"></a><strong>目标</strong>：理解平台中的存储和网络设计</h3><p><strong>学习内容</strong>：</p><ol><li><p><strong>NFS基础（第1周）</strong></p><ul><li>什么是NFS（网络文件系统）</li><li>为什么需要共享存储</li><li>简单搭建一个NFS服务体验</li></ul></li><li><p><strong>理解平台存储架构</strong></p><ul><li>重新阅读文档中的“容器磁盘 vs NFS云盘”</li><li>画图理解：容器内部 <code>/root</code> 目录是如何挂载NFS的</li><li>理解为什么conda环境可以共享</li></ul></li><li><p><strong>网络基础（第2-3周）</strong></p><ul><li>什么是IP、端口、网关</li><li>Docker网络基础：桥接网络、端口映射</li><li>理解 <code>-p 8080:80</code> 是什么意思</li><li>学习简单的网络故障排查</li></ul></li></ol><p><strong>动手实验</strong>：</p><ul><li>在本地搭建两个虚拟机，配置NFS共享</li><li>创建一个Docker容器，挂载NFS共享目录</li></ul><hr><h2 id="🏗️-第四阶段：平台实战与理解-2-3周"><a href="#🏗️-第四阶段：平台实战与理解-2-3周" class="headerlink" title="🏗️ 第四阶段：平台实战与理解 (2-3周)"></a>🏗️ <strong>第四阶段：平台实战与理解 (2-3周)</strong></h2><h3 id="目标：将所学应用到实际平台理解中"><a href="#目标：将所学应用到实际平台理解中" class="headerlink" title="目标：将所学应用到实际平台理解中"></a><strong>目标</strong>：将所学应用到实际平台理解中</h3><p><strong>学习步骤</strong>：</p><ol><li><p><strong>平台架构图绘制</strong></p><ul><li>根据文档，画出平台的简化架构图</li><li>标记出：用户 → Web界面 → Gateway → Host → Container → NFS</li><li>理解数据流向</li></ul></li><li><p><strong>实际操作平台</strong></p><ul><li>申请一个测试容器</li><li>在容器内安装软件（用apt）</li><li>在&#x2F;root目录下创建文件，理解NFS共享</li><li>用conda创建一个Python环境</li></ul></li><li><p><strong>资源监控初识</strong></p><ul><li>学习使用 <code>htop</code>, <code>nvidia-smi</code>, <code>df -h</code> 等命令</li><li>理解平台文档中的“CPU、内存、GPU监控”</li></ul></li><li><p><strong>问题排查基础</strong></p><ul><li>容器启动失败怎么办？</li><li>网络不通怎么办？</li><li>磁盘空间不足怎么办？</li></ul></li></ol><hr><h2 id="🚀-第五阶段：扩展与进阶-持续学习"><a href="#🚀-第五阶段：扩展与进阶-持续学习" class="headerlink" title="🚀 第五阶段：扩展与进阶 (持续学习)"></a>🚀 <strong>第五阶段：扩展与进阶 (持续学习)</strong></h2><h3 id="目标：深入理解平台高级特性"><a href="#目标：深入理解平台高级特性" class="headerlink" title="目标：深入理解平台高级特性"></a><strong>目标</strong>：深入理解平台高级特性</h3><p><strong>可选学习方向</strong>：</p><ol><li><strong>容器编排</strong>：学习Docker Compose、Kubernetes基础</li><li><strong>监控系统</strong>：学习Prometheus + Grafana</li><li><strong>CI&#x2F;CD</strong>：学习GitLab CI或GitHub Actions</li><li><strong>安全基础</strong>：学习容器安全、权限控制</li></ol><hr><h2 id="📚-学习资源推荐（零基础友好）"><a href="#📚-学习资源推荐（零基础友好）" class="headerlink" title="📚 学习资源推荐（零基础友好）"></a>📚 <strong>学习资源推荐（零基础友好）</strong></h2><h3 id="视频教程（B站）："><a href="#视频教程（B站）：" class="headerlink" title="视频教程（B站）："></a><strong>视频教程（B站）</strong>：</h3><ol><li>【Linux】“Linux基础命令全集” - 黑马程序员</li><li>【Docker】“Docker容器技术全集” - 尚硅谷</li><li>【网络】“计算机网络基础” - 湖科大教书匠</li></ol><h3 id="网站-文档："><a href="#网站-文档：" class="headerlink" title="网站&#x2F;文档："></a><strong>网站&#x2F;文档</strong>：</h3><ol><li><strong>菜鸟教程</strong>（runoob.com）- Linux&#x2F;Docker基础</li><li><strong>Docker官方文档</strong>（有中文）- 最权威</li><li><strong>MDN Web文档</strong> - 学习网络基础知识</li></ol><h3 id="实践平台："><a href="#实践平台：" class="headerlink" title="实践平台："></a><strong>实践平台</strong>：</h3><ol><li><strong>本地</strong>：Docker Desktop + WSL2</li><li><strong>在线实验</strong>：Katacoda（免费Docker实验环境）</li><li><strong>云服务器</strong>：阿里云&#x2F;腾讯云学生优惠（最低配置即可）</li></ol><hr><h2 id="🎯-具体学习计划表（前2个月）"><a href="#🎯-具体学习计划表（前2个月）" class="headerlink" title="🎯 具体学习计划表（前2个月）"></a>🎯 <strong>具体学习计划表（前2个月）</strong></h2><table><thead><tr><th>周数</th><th>学习重点</th><th>每日任务（约1-2小时）</th><th>完成标志</th></tr></thead><tbody><tr><td>第1周</td><td>Linux基础</td><td>学习5个命令+练习</td><td>能在命令行中自如移动、查看文件</td></tr><tr><td>第2周</td><td>Docker安装与运行</td><td>安装Docker，运行3种不同容器</td><td>成功运行Nginx、Redis、MySQL容器</td></tr><tr><td>第3周</td><td>Docker命令精通</td><td>掌握10个核心命令</td><td>能独立管理容器生命周期</td></tr><tr><td>第4周</td><td>Dockerfile实践</td><td>编写2个Dockerfile</td><td>成功构建自定义镜像</td></tr><tr><td>第5周</td><td>数据持久化</td><td>练习Volume挂载</td><td>实现容器数据持久化保存</td></tr><tr><td>第6周</td><td>NFS基础</td><td>搭建简单NFS服务</td><td>实现两台机器文件共享</td></tr><tr><td>第7周</td><td>平台理解</td><td>画出平台架构图</td><td>能向别人解释平台工作原理</td></tr><tr><td>第8周</td><td>平台实战</td><td>在平台上完成一个任务</td><td>成功创建容器、安装软件、保存数据</td></tr></tbody></table><hr><h2 id="❓-遇到困难怎么办？"><a href="#❓-遇到困难怎么办？" class="headerlink" title="❓ 遇到困难怎么办？"></a>❓ <strong>遇到困难怎么办？</strong></h2><ol><li><strong>谷歌&#x2F;百度是你的朋友</strong>：搜索“docker如何xxx”</li><li><strong>加入技术社区</strong>：Stack Overflow、SegmentFault、知乎</li><li><strong>问问题技巧</strong>：描述你做了什么、期望结果是什么、实际结果是什么、错误信息是什么</li><li><strong>先尝试再问</strong>：自己尝试解决30分钟，解决不了再问</li></ol><hr><h2 id="💡-最重要建议"><a href="#💡-最重要建议" class="headerlink" title="💡 最重要建议"></a>💡 <strong>最重要建议</strong></h2><ol><li><strong>动手 &gt; 看视频 &gt; 看书</strong>：技术学习必须动手</li><li><strong>不要怕犯错</strong>：容器可以随意删除重建</li><li><strong>从简单开始</strong>：先跑起来，再理解原理</li><li><strong>定期复习</strong>：每周回顾一次学过的内容</li><li><strong>找同伴</strong>：找个一起学习的伙伴互相督促</li></ol><p><strong>现在就开始</strong>：今天就在你的电脑上安装Docker，运行 <code>docker run hello-world</code>！</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 开发 </category>
+          
+          <category> Docker </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> plan </tag>
+            
+            <tag> AI Platform </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>考研英语Plans</title>
       <link href="/2025/12/07/English/"/>
       <url>/2025/12/07/English/</url>
@@ -31,11 +60,11 @@
     
     
     <entry>
-      <title></title>
+      <title>第一句话在这！</title>
       <link href="/2025/12/06/THE%20FIRST/"/>
       <url>/2025/12/06/THE%20FIRST/</url>
       
-        <content type="html"><![CDATA[<hr><h2 id="title-第一句话date-2025-12-06"><a href="#title-第一句话date-2025-12-06" class="headerlink" title="title:第一句话date:2025-12-06"></a>title:第一句话<br>date:2025-12-06</h2><h1 id="第一句话"><a href="#第一句话" class="headerlink" title="第一句话"></a>第一句话</h1><p>能看见我吗？！</p>]]></content>
+        <content type="html"><![CDATA[<h1 id="第一句话"><a href="#第一句话" class="headerlink" title="第一句话"></a>第一句话</h1><p>能看见我吗？！</p>]]></content>
       
       
       
