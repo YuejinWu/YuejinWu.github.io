@@ -189,41 +189,45 @@
         }
       }
       detectApple()
-    })(window)</script><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet"><style>
-  /* 文章正文样式 */
-  .post-content {
-    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    font-size: 16px;
-    line-height: 1.8;
-    color: #333;
-    text-align: justify;  /* 两端对齐 */
+    })(window)</script><style>
+  /* === 只添加半透明磨砂效果，不改变任何布局 === */
+  
+  /* 1. 导航栏内所有可点击元素添加磨砂背景 */
+  #nav a,
+  #nav button {
+    /* 保持原有布局，只添加背景效果 */
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    transition: backdrop-filter 0.3s ease !important;
   }
   
-  /* 文章标题 */
-  .post-title {
-    font-family: 'PingFang SC', 'Hiragino Sans GB', sans-serif;
-    font-weight: 700;
-    color: #2c3e50;
+  /* 2. 浅色模式：白色半透明 */
+  body:not([data-theme="dark"]) #nav a,
+  body:not([data-theme="dark"]) #nav button {
+    background-color: rgba(255, 255, 255, 0.1) !important;
   }
   
-  /* 引用块 */
-  .post-content blockquote {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-style: italic;
-    border-left: 4px solid #3498db;
-    background-color: #f8f9fa;
-    padding: 15px 20px;
-    margin: 20px 0;
+  /* 3. 深色模式：黑色半透明 */
+  [data-theme="dark"] #nav a,
+  [data-theme="dark"] #nav button {
+    background-color: rgba(0, 0, 0, 0.1) !important;
   }
   
-  /* 深色模式适配 */
-  @media (prefers-color-scheme: dark) {
-    .post-content {
-      color: #e0e0e0;
-    }
-    .post-title {
-      color: #ffffff;
-    }
+  /* 4. 悬停效果：稍微增加透明度 */
+  #nav a:hover,
+  #nav button:hover {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  
+  body:not([data-theme="dark"]) #nav a:hover,
+  body:not([data-theme="dark"]) #nav button:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  [data-theme="dark"] #nav a:hover,
+  [data-theme="dark"] #nav button:hover {
+    background-color: rgba(0, 0, 0, 0.15) !important;
   }
 </style>
 <meta name="generator" content="Hexo 8.1.1"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en &amp;&amp; zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>分类 | Yuejin's Blog</title><meta name="author" content="Yuejin Wu"><meta name="copyright" content="Yuejin Wu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="分类"><meta name="application-name" content="分类"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="website"><meta property="og:title" content="分类"><meta property="og:url" content="http://example.com/about/index.html"><meta property="og:site_name" content="Yuejin's Blog"><meta property="og:description" content="分类"><meta property="og:locale" content="en &amp;&amp; zh-Hans"><meta property="og:image" content="http://example.com/img/aniya3.png"><meta property="article:author" content="Yuejin Wu"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="http://example.com/img/aniya3.png"><meta name="description" content="分类"><link rel="shortcut icon" href="/img/my_logo.ico"><link rel="canonical" href="http://example.com/about/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+<!DOCTYPE html><html lang="en &amp;&amp; zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>分类 | Yuejin's Blog</title><meta name="author" content="Yuejin Wu"><meta name="copyright" content="Yuejin Wu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="分类"><meta name="application-name" content="分类"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="website"><meta property="og:title" content="分类"><meta property="og:url" content="http://example.com/about/index.html"><meta property="og:site_name" content="Yuejin's Blog"><meta property="og:description" content="分类"><meta property="og:locale" content="en &amp;&amp; zh-Hans"><meta property="og:image" content="http://example.com/img/aniya2.png"><meta property="article:author" content="Yuejin Wu"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="http://example.com/img/aniya2.png"><meta name="description" content="分类"><link rel="shortcut icon" href="/img/my_logo.ico"><link rel="canonical" href="http://example.com/about/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
   linkPageTop: undefined,
   peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
   postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
@@ -189,41 +189,45 @@
         }
       }
       detectApple()
-    })(window)</script><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet"><style>
-  /* 文章正文样式 */
-  .post-content {
-    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    font-size: 16px;
-    line-height: 1.8;
-    color: #333;
-    text-align: justify;  /* 两端对齐 */
+    })(window)</script><style>
+  /* === 只添加半透明磨砂效果，不改变任何布局 === */
+  
+  /* 1. 导航栏内所有可点击元素添加磨砂背景 */
+  #nav a,
+  #nav button {
+    /* 保持原有布局，只添加背景效果 */
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    transition: backdrop-filter 0.3s ease !important;
   }
   
-  /* 文章标题 */
-  .post-title {
-    font-family: 'PingFang SC', 'Hiragino Sans GB', sans-serif;
-    font-weight: 700;
-    color: #2c3e50;
+  /* 2. 浅色模式：白色半透明 */
+  body:not([data-theme="dark"]) #nav a,
+  body:not([data-theme="dark"]) #nav button {
+    background-color: rgba(255, 255, 255, 0.1) !important;
   }
   
-  /* 引用块 */
-  .post-content blockquote {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-style: italic;
-    border-left: 4px solid #3498db;
-    background-color: #f8f9fa;
-    padding: 15px 20px;
-    margin: 20px 0;
+  /* 3. 深色模式：黑色半透明 */
+  [data-theme="dark"] #nav a,
+  [data-theme="dark"] #nav button {
+    background-color: rgba(0, 0, 0, 0.1) !important;
   }
   
-  /* 深色模式适配 */
-  @media (prefers-color-scheme: dark) {
-    .post-content {
-      color: #e0e0e0;
-    }
-    .post-title {
-      color: #ffffff;
-    }
+  /* 4. 悬停效果：稍微增加透明度 */
+  #nav a:hover,
+  #nav button:hover {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  
+  body:not([data-theme="dark"]) #nav a:hover,
+  body:not([data-theme="dark"]) #nav button:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  [data-theme="dark"] #nav a:hover,
+  [data-theme="dark"] #nav button:hover {
+    background-color: rgba(0, 0, 0, 0.15) !important;
   }
 </style>
 <meta name="generator" content="Hexo 8.1.1"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
