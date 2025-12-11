@@ -978,9 +978,32 @@ document.addEventListener("DOMContentLoaded", function () {
    */
   const addRuntime = () => {
     const $runtimeCount = document.getElementById("runtimeshow");
-    if ($runtimeCount) {
-      const publishDate = $runtimeCount.getAttribute("data-publishDate");
-      $runtimeCount.textContent = `${anzhiyu.diffDate(publishDate)} ${GLOBAL_CONFIG.runtime}`;
+    if (!$runtimeCount) {
+      return;
+    }
+    
+    let publishDate = $runtimeCount.getAttribute("data-publishDate");
+    if (!publishDate) {
+      return;
+    }
+    
+    try {
+      const dateNow = new Date();
+      const datePost = new Date(publishDate);
+      
+      if (isNaN(datePost.getTime())) {
+        $runtimeCount.innerHTML = '<span style="color:red;">日期格式错误</span>';
+        return;
+      }
+      
+      const dateDiff = dateNow.getTime() - datePost.getTime();
+      const dayDiff = Math.floor(dateDiff / (1000 * 60 * 60 * 24));
+      const unit = GLOBAL_CONFIG.runtime || "天";
+      
+      $runtimeCount.innerHTML = `${dayDiff} ${unit}`;
+    } catch (e) {
+      console.error("Runtime calculation error:", e);
+      $runtimeCount.innerHTML = '<span style="color:red;">计算错误</span>';
     }
   };
 
@@ -1749,6 +1772,8 @@ document.addEventListener("DOMContentLoaded", function () {
     GLOBAL_CONFIG.islazyload && lazyloadImg();
     GLOBAL_CONFIG.copyright !== undefined && addCopyright();
     GLOBAL_CONFIG.navMusic && listenNavMusicPause();
+    addRuntime();
+    addLastPushDate();
     if (GLOBAL_CONFIG.shortcutKey && document.getElementById("consoleKeyboard")) {
       localStorage.setItem("keyboardToggle", "true");
       document.getElementById("consoleKeyboard").classList.add("on");
@@ -1776,7 +1801,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     addDarkModeEventListener("console", ".darkmode_switchbutton");
 
-    if (GLOBAL_CONFIG_SITE.isPost) {
+    if (typeof GLOBAL_CONFIG_SITE !== 'undefined' && GLOBAL_CONFIG_SITE.isPost) {
       GLOBAL_CONFIG.noticeOutdate !== undefined && addPostOutdateNotice();
       GLOBAL_CONFIG.relativeDate.post && relativeDate(document.querySelectorAll("#post-meta time"));
     } else {
@@ -1785,14 +1810,14 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (GLOBAL_CONFIG.relativeDate.simplehomepage) {
         relativeDate(document.querySelectorAll("#recent-posts time"), true);
       }
-      GLOBAL_CONFIG.runtime && addRuntime();
-      addLastPushDate();
       toggleCardCategory();
     }
+    addRuntime();
+    addLastPushDate();
 
     GLOBAL_CONFIG.diytitle && changeDocumentTitle();
     scrollFnToDo();
-    GLOBAL_CONFIG_SITE.isHome && scrollDownInIndex();
+    typeof GLOBAL_CONFIG_SITE !== 'undefined' && GLOBAL_CONFIG_SITE.isHome && scrollDownInIndex();
     addHighlightTool();
     GLOBAL_CONFIG.isPhotoFigcaption && addPhotoFigcaption();
     scrollFn();
@@ -1853,4 +1878,20 @@ document.addEventListener("DOMContentLoaded", function () {
   initRightMenu();
   refreshFn();
   unRefreshFn();
+  
+  // 确保建站时间显示
+  setTimeout(() => {
+    const elem = document.getElementById("runtimeshow");
+    if (elem && elem.innerHTML.includes('anzhiyu-spin')) {
+      const publishDate = elem.getAttribute("data-publishDate");
+      if (publishDate) {
+        const now = new Date();
+        const start = new Date(publishDate);
+        if (!isNaN(start.getTime())) {
+          const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+          elem.innerHTML = `${days} 天`;
+        }
+      }
+    }
+  }, 100);
 });
