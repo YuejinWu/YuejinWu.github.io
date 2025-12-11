@@ -18,3 +18,16 @@ img.post-cover, .post-cover img {
     height: auto !important;
     aspect-ratio: unset !important;
 }
+/* 修复作者卡片悬停时名字与简介重叠的问题 */
+.card-author .author-info__name {
+    transition: opacity 0.5s ease !important; /* 添加与头像相同的淡出效果 */
+}
+
+#aside-content .card-info:hover .author-info__name {
+    opacity: 0 !important; /* 悬停时隐藏名字 */
+}
+
+/* 可选：如果想在隐藏名字的同时让简介上移得更自然，可以同时添加 */
+#aside-content .card-info:hover .card-author .description {
+    transform: translateY(-0.5rem) !important; /* 将简介微微上移 */
+}
