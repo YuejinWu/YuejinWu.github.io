@@ -4,7 +4,32 @@
   
     
     <entry>
-      <title>E-R Model 解读</title>
+      <title>§13 Data Storage Structures 简读</title>
+      <link href="/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/"/>
+      <url>/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/</url>
+      
+        <content type="html"><![CDATA[<h3 id="数据存储结构-—-第13章"><a href="#数据存储结构-—-第13章" class="headerlink" title="数据存储结构 — 第13章"></a>数据存储结构 — 第13章</h3><h2 id="13-1-引言"><a href="#13-1-引言" class="headerlink" title="13.1 引言"></a>13.1 引言</h2><p>物理数据库设计中的两个核心问题：</p><ol><li><strong>数据组织</strong>：即数据的物理存储结构 — 本章重点。</li><li><strong>数据访问</strong>：例如索引 — 第14章重点。</li></ol><p><strong>解决方案</strong>：</p><ol><li>选择合适的数据库<strong>物理结构</strong>。</li><li>设置合理的数据库表<strong>索引</strong>，提高数据查询速度。</li></ol><p><strong>本章大纲</strong>：</p><ul><li>文件组织（File Organization）</li><li>记录的组织方式（Organization of Records）</li><li>数据字典存储（Data-Dictionary Storage）</li><li>数据缓冲区（Data Buffer）</li><li>列式存储（Column-oriented Storage）</li></ul><hr><h2 id="13-2-文件组织"><a href="#13-2-文件组织" class="headerlink" title="13.2 文件组织"></a>13.2 文件组织</h2><p><strong>文件组织&#x2F;结构</strong>：</p><ul><li><strong>逻辑组织&#x2F;结构</strong>：流式文件、记录文件、索引文件。</li><li><strong>物理组织&#x2F;结构</strong>：以块（block）为单位，存储在二级存储（如磁盘）上。<br>特征包括：连续分配（contiguous）、链式分配（linked）、索引分配（indexed）。</li></ul><p><strong>数据库中的文件组织</strong>：</p><ul><li>数据库存储为一系列<strong>数据库文件</strong>（主文件、辅助文件、日志文件等）。</li><li>每个文件是<strong>记录</strong>的序列。</li><li>每个记录由一系列<strong>字段</strong>组成。</li></ul><p><strong>一种常见方法</strong>：</p><ul><li>记录<strong>长度固定</strong>。</li><li>每个文件仅存储<strong>一种特定类型</strong>的记录。</li><li>不同的关系（表）使用不同的文件。</li></ul><p><strong>关系表与文件的对应</strong>：</p><ul><li>每个关系表是一组元组（tuple）。</li><li>每个文件是记录的序列。</li><li>一个<strong>元组</strong>在数据库中存储为一个<strong>记录</strong>。</li><li>记录可以是<strong>定长</strong>或<strong>变长</strong>（例如 <code>VARCHAR(20)</code>）。</li></ul><h3 id="1-定长记录"><a href="#1-定长记录" class="headerlink" title="1. 定长记录"></a>1. 定长记录</h3><p><strong>简单方法</strong>：</p><ul><li>一个块包含多个记录。</li><li>记录 <em>i</em> 从字节 <code>n × (i - 1)</code> 开始存储，其中 <em>n</em> 为每个记录的大小。</li><li><strong>记录访问简单</strong>，但记录<strong>可能跨越块边界</strong>。</li></ul><p><strong>修改方案</strong>：不允许记录跨越块边界。</p><p><strong>示例</strong>：<br><code>instructor(ID, name, dept, salary)</code><br>所有记录存储在一个连续的空间中（连续分配）。</p><p><strong>记录的删除</strong>：</p><ol><li><strong>紧凑法</strong>：将记录 i+1, …, n 移动到 i, …, n-1。</li><li><strong>末尾移动法</strong>：将最后一个记录 n 移动到位置 i。</li><li><strong>空闲链表法</strong>：不移动记录，而是将所有空闲记录链接成一个<strong>空闲链表</strong>。</li></ol><p><strong>空闲链表</strong>：</p><ul><li>在文件头中存储<strong>第一个被删除记录的地址</strong>。</li><li>利用该记录存储第二个被删除记录的地址，依此类推。</li><li>这些地址可视为<strong>指针</strong>，指向记录位置。</li><li>记录可以存储在<strong>非连续空间</strong>中（链式分配）。</li></ul><h3 id="2-变长记录"><a href="#2-变长记录" class="headerlink" title="2. 变长记录"></a>2. 变长记录</h3><p><strong>变长记录的来源</strong>：</p><ul><li>记录类型允许变长字段（如字符串 <code>VARCHAR</code>）。</li><li>一个文件中包含<strong>多种记录类型</strong>（例如多表聚类文件）。</li></ul><p><strong>存储方法</strong>：</p><ol><li>属性按顺序存储。</li><li><strong>定长属性</strong>先存储。</li><li><strong>变长属性</strong>用固定大小的（偏移量，长度）表示，实际数据存储在所有定长属性之后。</li><li>空值用<strong>空值位图</strong>表示。</li></ol><p><strong>示例</strong>：<br><code>instructor: ID(5 varchar), name(10 varchar), dept(10 varchar), salary(8 int)</code><br>记录0存储在连续的46个字节（0-45）中，其中变长属性用 <code>&lt;偏移量, 长度&gt;</code> 表示。</p><h3 id="分槽页结构"><a href="#分槽页结构" class="headerlink" title="分槽页结构"></a>分槽页结构</h3><ul><li>存储空间划分为<strong>固定大小的分槽页</strong>（如4KB或8KB）。</li><li>记录被分配到分槽页中。</li></ul><p><strong>分槽页头包含</strong>：</p><ul><li>记录条目数量（例如4）。</li><li>块中空闲空间的末尾位置。</li><li>每个记录的位置和大小。</li></ul><p><strong>特点</strong>：</p><ul><li>记录可以在页内移动以保持连续性。</li><li>删除记录 <em>rᵢ</em> 后，后续记录 <em>rᵢ₊₁, rᵢ₊₂, rᵢ₊₃</em> 可移动到删除释放的空间中。</li><li>页头中的条目需要更新（例如设置为-1）。</li><li><strong>指针不应直接指向记录</strong>，而应指向页头中该记录的<strong>条目</strong>。</li></ul><hr><h2 id="13-3-文件中记录的组织方式"><a href="#13-3-文件中记录的组织方式" class="headerlink" title="13.3 文件中记录的组织方式"></a>13.3 文件中记录的组织方式</h2><ul><li>在逻辑层面，数据库文件可视为<strong>记录的集合</strong>。</li><li>记录的<strong>逻辑组织方式</strong>决定了<strong>访问方法</strong>（存取方法）。</li></ul><p><strong>四种逻辑组织方式</strong>：</p><ol><li><strong>堆文件</strong>（Heap）</li><li><strong>顺序文件</strong>（Sequential）</li><li><strong>聚类文件</strong>（Clustering）</li><li><strong>哈希文件</strong>（Hashing）</li></ol><h3 id="1-堆文件组织"><a href="#1-堆文件组织" class="headerlink" title="1. 堆文件组织"></a>1. 堆文件组织</h3><ul><li>记录可以放在文件中有空间的<strong>任何位置</strong>。</li><li>数据<strong>没有主键</strong>，<strong>没有索引</strong>。</li><li>记录一旦分配通常不移动。</li><li><strong>一个关系对应一个文件</strong>。</li></ul><p><strong>特点</strong>：</p><ul><li>记录按输入顺序存储，与主键无关。</li><li>例如：创建 <code>student(ID, name, total-credits)</code> 且不定义任何键或索引。</li></ul><p><strong>空闲空间映射</strong>：</p><ul><li>每个块一个条目，记录该块中<strong>空闲空间的比例</strong>。</li><li>示例：每块3位（0–7），值除以8表示空闲比例。</li><li>可设计<strong>二级空闲空间映射</strong>，例如每条目存储一级映射中最多4个条目的最大值。</li></ul><h3 id="2-顺序文件组织"><a href="#2-顺序文件组织" class="headerlink" title="2. 顺序文件组织"></a>2. 顺序文件组织</h3><ul><li>记录按<strong>搜索键</strong>（search-key）<strong>逻辑排序</strong>。</li><li>记录尽可能按搜索键顺序<strong>物理存储</strong>，以最小化顺序处理时的块访问次数。</li><li>通过<strong>指针链</strong>将记录按搜索键顺序链接起来。</li></ul><p><strong>适用场景</strong>：适合整个文件的顺序处理。</p><p><strong>插入与删除</strong>：</p><ul><li><strong>删除</strong>：使用指针链调整。</li><li><strong>插入</strong>：<ul><li>若有空闲空间，直接插入。</li><li>若无空闲空间，插入到<strong>溢出块</strong>中。</li><li>需更新指针链。</li></ul></li><li><strong>需要定期重组文件</strong>以恢复顺序性。</li></ul><h3 id="3-聚类文件组织"><a href="#3-聚类文件组织" class="headerlink" title="3. 聚类文件组织"></a>3. 聚类文件组织</h3><ul><li>使用<strong>多表聚类文件组织</strong>，将多个关系的记录存储在<strong>同一个文件</strong>中。</li><li><strong>动机</strong>：将相关的记录（如 <code>instructor</code> 和 <code>department</code>）存储在同一块中，以最小化I&#x2F;O。</li></ul><p><strong>优点</strong>：对于涉及多表连接的查询（如 <code>department</code> ⨝ <code>instructor</code>）效率高。<br><strong>缺点</strong>：对于只涉及单个关系的查询，会导致变长记录问题。<br><strong>改进</strong>：可为特定关系的记录添加指针链。</p><h3 id="4-哈希文件组织"><a href="#4-哈希文件组织" class="headerlink" title="4. 哈希文件组织"></a>4. 哈希文件组织</h3><ul><li>文件记录存储在<strong>桶</strong>（bucket）中，桶号即记录地址。</li><li>基于某些属性（搜索键）的<strong>哈希函数</strong>决定记录的存储桶。</li><li>哈希函数 <code>h: {search-key} → {物理地址（桶号）}</code>。</li></ul><p><strong>示例</strong>：<br><code>account(ID, branch-name, balance)</code>，以 <code>branch-name</code> 为搜索键进行哈希组织。</p><hr><h2 id="13-4-数据字典存储"><a href="#13-4-数据字典存储" class="headerlink" title="13.4 数据字典存储"></a>13.4 数据字典存储</h2><p><strong>数据字典（目录）存储元数据</strong>，包括：</p><ul><li>关系名称。</li><li>属性的名称、类型和长度。</li><li>视图的名称和定义。</li><li>完整性约束。</li><li>用户和账户信息、密码。</li><li>统计和描述性数据（如每个关系的元组数）。</li><li>物理文件组织信息（如存储方式、物理位置）。</li><li>索引信息。</li></ul><p><strong>表示方式</strong>：</p><ul><li>关系表示。</li><li>为高效内存访问设计的专用数据结构。</li></ul><hr><h2 id="13-5-数据缓冲区"><a href="#13-5-数据缓冲区" class="headerlink" title="13.5 数据缓冲区"></a>13.5 数据缓冲区</h2><p><strong>定义</strong>：</p><ul><li><strong>块</strong>：数据库文件划分为固定长度的存储单元，是存储分配和数据传输的基本单位。</li><li><strong>缓冲区</strong>：主内存中用于存储<strong>磁盘块副本</strong>的部分。</li><li><strong>缓冲区管理器</strong>：负责在主内存中分配缓冲区空间。</li></ul><p><strong>目标</strong>：最小化磁盘与主内存之间的<strong>块传输次数</strong>。</p><p><strong>缓冲区管理器的工作流程</strong>：</p><ol><li>程序（请求者）需要磁盘块时，调用缓冲区管理器。</li><li>若块<strong>已在缓冲区</strong>，返回其在主内存中的地址。</li><li>若块<strong>不在缓冲区</strong>：<ol><li>在缓冲区中为块分配空间（必要时替换其他块）。</li><li>若被替换的块自上次写入后已被修改，则写回磁盘。</li><li>从磁盘读取块到缓冲区，并返回其主内存地址。</li></ol></li></ol><p><strong>关键概念</strong>：</p><ul><li><strong>钉住块</strong>：不允许写回磁盘的内存块。在读写数据前需 <code>pin</code>，完成后需 <code>unpin</code>。</li><li><strong>共享锁与排他锁</strong>：<ul><li>读操作需要<strong>共享锁</strong>。</li><li>更新操作需要<strong>排他锁</strong>。</li><li>锁定规则：<ul><li>一次只能有一个进程获得排他锁。</li><li>共享锁不能与排他锁并发。</li><li>多个进程可同时持有共享锁。</li></ul></li></ul></li></ul><p><strong>缓冲区替换策略</strong>：</p><ol><li><strong>最近最少使用</strong>：替换最久未使用的块。但某些访问模式（如嵌套循环连接）可能导致性能不佳。</li><li><strong>立即丢弃</strong>：块中最后一个元组处理完后立即释放其空间。</li><li><strong>最近最多使用</strong>：钉住当前正在处理的块，处理完后取消钉住，使其成为最近最多使用的块。</li></ol><p><strong>启发式策略</strong>：</p><ul><li>利用统计信息（如数据字典访问频繁）将常用块保留在缓冲区。</li><li>谨慎排序写操作，避免磁盘上数据结构损坏。</li></ul><hr><h2 id="13-6-列式存储"><a href="#13-6-列式存储" class="headerlink" title="13.6 列式存储"></a>13.6 列式存储</h2><ul><li>也称为<strong>列式表示</strong>。</li><li>将关系的<strong>每个属性单独存储</strong>。</li></ul><p><strong>示例</strong>：<br><code>instructor(ID, Name, dept_name, salary)</code><br>更新操作仅需访问 <code>salary</code> 列。</p><p><strong>优点</strong>：</p><ul><li>若只访问部分属性，可减少I&#x2F;O。</li><li>提高CPU缓存性能。</li><li>改进压缩效率。</li></ul><p><strong>缺点</strong>：</p><ul><li>从列式表示重构元组的成本较高。</li><li>元组删除和更新的成本较高。</li></ul><p><strong>适用场景</strong>：</p><ul><li>列式表示更适用于<strong>决策支持系统</strong>。</li><li>行式表示更适用于<strong>事务处理系统</strong>。</li></ul><hr><h2 id="附录13-1-数据组织与访问"><a href="#附录13-1-数据组织与访问" class="headerlink" title="附录13-1 数据组织与访问"></a>附录13-1 数据组织与访问</h2><h3 id="数据组织"><a href="#数据组织" class="headerlink" title="数据组织"></a>数据组织</h3><ul><li>对用户而言，数据组织为<strong>关系表、元组和属性</strong>（用户导向的逻辑组织）。</li><li>对操作系统而言，数据存储为<strong>操作系统文件</strong>（即数据库文件）。</li><li>数据库文件在逻辑上组织为<strong>记录的序列</strong>。</li><li>数据库文件驻留在二级存储（磁盘）上，以<strong>块</strong>为单位。</li></ul><p><strong>对应关系</strong>：</p><ul><li>1个元组 对应于 1个文件逻辑记录（定长或变长）。</li><li>1个关系表 对应于 1个OS文件（或1个文件存储多个关系表的数据）。</li><li>1个块 包含 多个文件逻辑记录。</li></ul><h3 id="数据访问"><a href="#数据访问" class="headerlink" title="数据访问"></a>数据访问</h3><h4 id="小型数据库系统（如dBASE、FoxBASE）"><a href="#小型数据库系统（如dBASE、FoxBASE）" class="headerlink" title="小型数据库系统（如dBASE、FoxBASE）"></a>小型数据库系统（如dBASE、FoxBASE）</h4><ul><li>关系表存储在单独文件中。</li><li>DBMS利用OS文件系统作为物理层基础。</li><li>用户通过OS文件系统访问数据，依赖度高，不利于移植。</li></ul><p><strong>地址映射过程</strong>：</p><ol><li>元组 → 逻辑地址（文件名，记录号）。</li><li>逻辑地址 → 物理地址（物理块号，具体地址）。</li></ol><h4 id="现代大型数据库系统（如SQL-Server、Oracle）"><a href="#现代大型数据库系统（如SQL-Server、Oracle）" class="headerlink" title="现代大型数据库系统（如SQL Server、Oracle）"></a>现代大型数据库系统（如SQL Server、Oracle）</h4><ul><li>DBMS向OS一次性申请外存空间（数据库文件）。</li><li>DBMS独立设计存储和访问结构，管理文件，提供访问机制。</li><li>支持动态扩容和压缩。</li></ul><p><strong>SQL Server案例</strong>：</p><ul><li>数据库由存储表和索引的磁盘空间构成，分配在一个或多个OS文件上。</li><li>数据库划分为逻辑<strong>页</strong>（每页8KB）。</li><li>页划分为<strong>槽</strong>，每槽存储一个数据行。</li><li>数据行的逻辑地址：<code>&lt;文件ID, 页ID, 槽ID&gt;</code>。</li><li>以<strong>盘区</strong>（64KB，连续8页）为单位分配物理空间。</li><li>使用全局分配映射（GAM）、共享全局分配映射（SGAM）和索引分配映射（IAM）管理空间和映射。</li><li>通过<strong>索引</strong>实现快速访问：<code>search-key → &lt;文件ID, 页ID, 槽ID&gt;</code>。</li></ul><h3 id="openGauss段页式存储管理"><a href="#openGauss段页式存储管理" class="headerlink" title="openGauss段页式存储管理"></a>openGauss段页式存储管理</h3><ul><li>采用<strong>段—区—页&#x2F;块</strong>的逻辑组织方式。</li><li>逻辑地址：<code>segment-extent-page/block</code>。</li></ul><p><strong>关键设计</strong>：</p><ol><li>每个数据库在一个表空间中有一个<strong>段空间</strong>，可跨多个物理文件。</li><li>每张表有一个逻辑<strong>段</strong>，所有数据存储在该段上。</li><li>每个段挂载多个<strong>区</strong>，每个区是外存上连续的物理页，但段内各区可不连续。</li><li>区大小可调（64KB、1MB、8MB、64MB），避免碎片。</li><li>支持<strong>自动扩容</strong>，但不自动回收空间（需手动回收）。</li></ol><p><strong>段扩展规则</strong>：</p><ul><li>前16个区：64KB</li><li>第17–143个区：1MB</li><li>后续区大小依规则递增</li></ul><hr><h2 id="附录13-2-Oracle与openGauss中的文件组织"><a href="#附录13-2-Oracle与openGauss中的文件组织" class="headerlink" title="附录13-2 Oracle与openGauss中的文件组织"></a>附录13-2 Oracle与openGauss中的文件组织</h2><h3 id="Oracle数据库中的表类型"><a href="#Oracle数据库中的表类型" class="headerlink" title="Oracle数据库中的表类型"></a>Oracle数据库中的表类型</h3><ol><li><strong>堆表</strong>（默认）：无序存储，写入快，读取慢。</li><li><strong>索引组织表</strong>：按主键顺序存储，读取快，但更新主键成本高，表宽度有限。</li><li><strong>簇表</strong>：多个表按连接键存储在同一个段中，提高连接查询效率（openGauss不兼容）。</li><li>临时表、压缩表、分区表、嵌套表等。</li></ol><h3 id="适用场景建议"><a href="#适用场景建议" class="headerlink" title="适用场景建议"></a>适用场景建议</h3><ul><li><strong>堆表</strong>：适合写入频繁、读取顺序无关的场景。</li><li><strong>索引组织表</strong>：适合主键稳定、以查询为主的场景。</li><li><strong>簇表</strong>：适合频繁进行特定连接查询的场景。</li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> 数据库 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Database </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>§6 E-R Model 解读</title>
       <link href="/2025/12/26/DB_E-R%20Model/"/>
       <url>/2025/12/26/DB_E-R%20Model/</url>
       
@@ -31,7 +56,7 @@
     
     
     <entry>
-      <title>Schema Normalization-Relational Database Design 解读</title>
+      <title>§7 Schema Normalization-Relational Database Design 解读</title>
       <link href="/2025/12/26/DB_Schema%20Normalization-Relational%20Database%20Design/"/>
       <url>/2025/12/26/DB_Schema%20Normalization-Relational%20Database%20Design/</url>
       
@@ -58,7 +83,7 @@
     
     
     <entry>
-      <title>Intermediate-SQL 解读</title>
+      <title>§4 Intermediate-SQL 解读</title>
       <link href="/2025/12/24/DB_Intermediate%20SQL/"/>
       <url>/2025/12/24/DB_Intermediate%20SQL/</url>
       
@@ -85,7 +110,7 @@
     
     
     <entry>
-      <title>Advanced-SQL课件详解</title>
+      <title>§5 Advanced-SQL课件详解</title>
       <link href="/2025/12/24/DB_AdvancedSQL/"/>
       <url>/2025/12/24/DB_AdvancedSQL/</url>
       
@@ -139,7 +164,7 @@
     
     
     <entry>
-      <title>Intro-to-SQL 简读</title>
+      <title>§3 Intro-to-SQL 简读</title>
       <link href="/2025/12/22/DB_SQL%20%E8%AF%AD%E8%A8%80%E7%AE%80%E8%AF%BB/"/>
       <url>/2025/12/22/DB_SQL%20%E8%AF%AD%E8%A8%80%E7%AE%80%E8%AF%BB/</url>
       
@@ -166,7 +191,7 @@
     
     
     <entry>
-      <title>关系模型 简读</title>
+      <title>§2 关系模型 简读</title>
       <link href="/2025/12/22/DB_%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B%E7%AE%80%E8%AF%BB/"/>
       <url>/2025/12/22/DB_%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B%E7%AE%80%E8%AF%BB/</url>
       
