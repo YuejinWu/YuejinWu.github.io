@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en &amp;&amp; zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>§17 Transaction 解读 | Yuejin's Blog</title><meta name="keywords" content="Database"><meta name="author" content="Yuejin Wu"><meta name="copyright" content="Yuejin Wu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="§17 Transaction 解读"><meta name="application-name" content="§17 Transaction 解读"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="§17 Transaction 解读"><meta property="og:url" content="http://example.com/2025/12/28/DB_Transaction/index.html"><meta property="og:site_name" content="Yuejin's Blog"><meta property="og:description" content="第17章：事务管理第5部分：事务管理 对数据库的单用户访问体现为一个或多个事务的执行。 例如：SELECT, INSERT, DELETE, UPDATE。 事务是数据库应用系统的基本逻辑单元，也是DBMS管理数据库系统的基本单位。   对数据库的多用户并发访问体现为一个或多个事务的并发执行。"><meta property="og:locale" content="en &amp;&amp; zh-Hans"><meta property="og:image" content="http://example.com/img/C7_cover.png"><meta property="article:author" content="Yuejin Wu"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="http://example.com/img/C7_cover.png"><meta name="description" content="第17章：事务管理第5部分：事务管理 对数据库的单用户访问体现为一个或多个事务的执行。 例如：SELECT, INSERT, DELETE, UPDATE。 事务是数据库应用系统的基本逻辑单元，也是DBMS管理数据库系统的基本单位。   对数据库的多用户并发访问体现为一个或多个事务的并发执行。"><link rel="shortcut icon" href="/img/mylogo.jpg"><link rel="canonical" href="http://example.com/2025/12/28/DB_Transaction/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+<!DOCTYPE html><html lang="en &amp;&amp; zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>§17 Transaction 解读 | Yuejin's Blog</title><meta name="keywords" content="Database"><meta name="author" content="Yuejin Wu"><meta name="copyright" content="Yuejin Wu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="§17 Transaction 解读"><meta name="application-name" content="§17 Transaction 解读"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="§17 Transaction 解读"><meta property="og:url" content="http://example.com/2025/12/28/DB_Transaction/index.html"><meta property="og:site_name" content="Yuejin's Blog"><meta property="og:description" content="第17章：事务管理  第5部分：事务管理  对数据库的单用户访问体现为一个或多个事务的执行。  例如：SELECT, INSERT, DELETE, UPDATE。 事务是数据库应用系统的基本逻辑单元，也是DBMS管理数据库系统的基本单位。   对数据库的多用户并发访问体现为一个或多个事务的并发执"><meta property="og:locale" content="en &amp;&amp; zh-Hans"><meta property="og:image" content="http://example.com/img/C7_cover.png"><meta property="article:author" content="Yuejin Wu"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="http://example.com/img/C7_cover.png"><meta name="description" content="第17章：事务管理  第5部分：事务管理  对数据库的单用户访问体现为一个或多个事务的执行。  例如：SELECT, INSERT, DELETE, UPDATE。 事务是数据库应用系统的基本逻辑单元，也是DBMS管理数据库系统的基本单位。   对数据库的多用户并发访问体现为一个或多个事务的并发执"><link rel="shortcut icon" href="/img/mylogo.jpg"><link rel="canonical" href="http://example.com/2025/12/28/DB_Transaction/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
   linkPageTop: undefined,
   peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
   postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
@@ -55,7 +55,7 @@
   configTitle: 'Yuejin's Blog',
   title: '§17 Transaction 解读',
   postAI: '',
-  pageFillDescription: '第17章：事务管理, 第5部分：事务管理, 事务管理, 17.1 事务概念, 定义1, 定义2, 事务：由读写元操作定义【逻辑读、逻辑写】, 包含回滚的事务, SQL语句 vs. 读写元操作, SQL Server中的事务示例, 17.2 事务模型, 事务模型中的操作定义, 事务读写操作示意图, 资金转账示例, ACID特性详解, 1. 一致性, 2. 原子性, 3. 隔离性, 4. 持久性, ACID特性的保障机制, 17.4 事务原子性与持久性（状态模型）, 关键定义, 事务状态（生命周期）, 事务状态图 (图17.1), 成功提交的事务流程, 回滚的事务流程, 事务状态详述, 示例：事务中的回滚, 17.5 事务隔离, 并发事务的调度, 并发执行与调度, 示例：并发调度分析, 串行调度 S1 (T₁ T₂), 串行调度 S2 (T₂ T₁), 并发调度 S3, 并发调度 S4, 为什么S3正确而S4错误？, 17.6 可串行化, 可串行化, 冲突可串行化, 冲突等价, 冲突可串行化, 冲突可串行化的判定方法, 示例1：判定冲突可串行化, 构建冲突可串行化调度, 17.7 事务隔离性与原子性（考虑故障的调度）, 可恢复调度, 示例1：不可恢复调度（违反完整性约束）, SQL Server中的回滚设置：SET XACT_ABORT, 示例2：不可恢复调度（简单读写）, 无级联回滚调度, 无级联回滚调度, 例题分析, 附录 17-1 SQL Server 中的事务, 三种事务执行模式, SQL Server 批处理中的事务, 附录 17-2 保存点, 第17章 事务：大纲概要, I. 事务概念与特性, II. 事务原子性与持久性, III. 多事务并发执行, IV. 正确的并发调度（考虑故障时）, V. 事务在SQL中的实现第章事务管理第部分事务管理对数据库的单用户访问体现为一个或多个事务的执行例如事务是数据库应用系统的基本逻辑单元也是管理数据库系统的基本单位对数据库的多用户并发访问体现为一个或多个事务的并发执行事务管理多个事务并发访问共享数据项为保证数据正确性必须满足特性原子性一致性隔离性持久性的恢复管理组件负责保障原子性和持久性的并发控制组件负责保障隔离性和一致性事务概念定义事务是数据库应用系统的一个单元用于执行对数据库中各种数据项的访问和更新定义一个事务由一组操作构成这些操作由特定的语句界定和操作对数据库的读或写或事务由应用程序发起这些程序可以用以下语言编写数据操作语言如编程语言如嵌入了数据库访问的事务由读写元操作定义逻辑读逻辑写示例账户转账从账户转账到账户需要处理的问题故障例如硬件故障和系统崩溃多个事务的并发执行包含回滚的事务撤销之前对的修改即恢复的原始值并立即终止不再执行其后的操作语句读写元操作语句可以分解为读和写操作示例表语句对应的读写操作语句对应的读写操作中的事务示例事务变量定义事务命名事务开始打开数据库将批处理语句提交给修改账户修改账户事务提交事务模型每个数据访问如中的都会被转换分解为读和写操作执行读写操作以实现事务中的数据访问在主存中分配局部缓冲区作为工作区域数据库持久驻留在磁盘上但部分数据会暂时驻留在主存的缓冲区中事务模型中的操作定义定义将数据项从磁盘上的数据库文件或磁盘缓冲区传输到执行该读操作的事务所属局部缓冲区中的一个变量也称为中定义将局部缓冲区中变量的值传输回磁盘上数据库文件中对应的数据项注意写操作不会立即更新磁盘上的数据它可能暂时存储在磁盘缓冲区中事务读写操作示意图示例表中的字段事务发出的对数据项和的数据访问如等为事务分配的局部缓冲区变量逻辑读写磁盘缓冲区中的数据项块物理读写反映持久化磁盘上的数据库文件在检查点或提交时写回资金转账示例示例从账户转账到账户的事务步骤的值的值初始值特性详解一致性事务在隔离状态下执行能够保持数据库的一致性在事务执行前后数据库都处于正确的状态事务的正确执行使得数据库从一个正确状态转移到另一个正确状态数据库状态数据库中表的内容或数据库实例一致性正确性定义示例完整性约束未被违反一致性要求示例和的总和保持不变即一致性要求包括显式的完整性约束如主键和外键隐式的完整性约束例如所有账户余额总和减去所有贷款金额总和必须等于手头现金价值在事务执行过程中数据库可能暂时处于不一致状态例如在上述转账示例的第步之后第步之前当事务成功完成时数据库必须是一致的原子性事务中的所有操作要么全部反映持久化到数据库要么一个都不反映事务中所有操作或者全部成功完成并且这些操作结果被写入数据库或者事务中的所有操作一个都不做该事务对数据库和其他事务没有任何影响确保部分执行的事务的更新不会被反映到数据库中隔离性定义即使多个事务并发执行所有事务看起来都像是在串行执行从而保持了一致性每个事务都不知道其他事务正在并发执行对于并发执行的事务一个事务的执行不能被其他事务干扰即一个事务内部的操作和数据对其他事务是隔离的并发执行的事务之间不能相互干扰从执行结果来看相当于事务串行执行隔离性保证了多个事务并发执行的正确性并发控制机制确保了隔离性示例如果在转账事务的第步和第步之间允许另一个事务访问部分更新的数据库将看到一个不一致的数据库总和为通过串行地运行事务一个接一个可以确保隔离性持久性定义一旦事务完成该事务对数据库的更新必须持久保持即使发生软件或硬件故障缓冲区中数据项的修改值应该反映写入到磁盘上的数据库文件中事务一旦提交成功完成对数据库数据的改变是永久性的即持久化示例的转账已经发生即使发生软件或硬件故障该事务对数据库的更新也必须持久保持示例对于图中的事务开始时局部缓冲区和磁盘缓冲区中执行后局部缓冲区中执行后局部缓冲区中提交时磁盘缓冲区中最终磁盘上的数据库文件中特性的保障机制数据库系统中的保障机制原子性由事务管理恢复管理组件保障一致性由完整性约束和中的测试机制保障隔离性由并发控制组件保障持久性由恢复管理组件保障事务原子性与持久性状态模型关键定义定义如果一个事务可能无法成功完成其执行则称其为中止定义如果一个事务成功完成其执行则称其为提交定义一旦一个已中止事务所做的更改被撤销则该事务被称为回滚定义如果一个事务已提交或已中止则称其已终止事务状态生命周期活动初始状态部分提交在最终语句通常是被执行之后失败正常执行无法再继续进行中止在事务已回滚且数据库恢复到事务开始前的状态之后中止后的两个选项重启事务仅当没有内部逻辑错误时终止事务提交在成功完成之后事务状态图图失败最终操作执行提交回滚或发生故障回滚完成重启可选成功提交的事务流程操作分配资源如局部缓冲区创建并启动事务执行操作等将数据反映到磁盘持久化释放资源结束事务状态流活动部分提交已提交回滚的事务流程故障回滚操作分配资源如局部缓冲区创建并启动事务执行操作发生故障触发回滚回滚撤销或重做之前的操作释放资源结束事务状态流活动失败中止事务状态详述活动初始状态事务从开始执行时处于此状态事务被创建在提交后例如为事务分配了局部缓冲区注意事务操作被执行但操作对数据库发出的修改可能只临时存储在磁盘缓冲区中并未立即反映到磁盘上的数据库文件部分提交在最终语句提交后事务进入此状态事务操作产生的影响从磁盘缓冲区反映到数据库文件持久化已提交在所有操作成功完成后事务进入此状态所有结果已在部分提交状态反映到数据库文件事务释放所占用的资源终止退出数据库系统其生命周期结束失败如果发现正常执行无法继续进行事务进入此状态事务被回滚以将数据库恢复到事务开始前的状态在此状态下进行失败处理工作中止在失败状态下事务被回滚后数据库已恢复到事务开始前的状态事务进入此状态以结束事务释放所占用的资源向其用户报告事务已中止终止退出数据库系统其生命周期结束表示已完成失败处理工作事务将要退出系统示例事务中的回滚定义回滚撤销到目前为止事务已经对数据库所做的所有修改数据库状态恢复到事务开始前的状态示例定义表定义更新事务回滚过程初始实例例如发生故障时的实例执行更新后变为违反完整性约束回滚后的实例撤销所有更新恢复到初始状态即事务隔离并发事务的调度事务的并发执行允许高吞吐量和资源利用率减少等待时间例如多用户订票系统允许事务并发的缺点事务包含对共享数据的操作不同的调度可能导致不同的最终数据库状态需要并发控制方案和事务调度并发执行与调度定义对一组并发事务的调度规定了并发事务操作的执行顺序包含事务的所有操作保持每个独立事务内部操作的顺序注意成功执行的事务将以指令作为最后一条语句执行失败的事务将以指令作为最后一条语句示例并发调度分析事务从转账到从转账余额的到初始值串行调度最终结果串行调度最终结果结论调度和导致共享数据项和的最终值不同但都是正确的调度因为都保持了总和不变并发调度将对的两次写操作对的两次写操作安排在相近时间执行利于在时刻通过一次操作一次性将的修改结果写回数据库文件减少写操作次数将对的两次读操作对的两次读操作安排在相近时间执行有利于减少读操作次数第二次可从磁盘缓冲区读取最终结果与结果相同并发调度假设直接从磁盘上的数据库文件读取数据最终结果错误为什么正确而错误等价于和对共享数据和的访问实质上是串行的与串行调度的执行结果相同等价于串行调度不等价于和以交错的方式操作共享数据和与串行调度的执行结果不同不等价于任何串行调度使数据库处于不一致状态注意隔离性和一致性被违反可串行化多个事务串行执行可以保证事务的特性如但执行效率低多个事务并发执行时如果事务操作调度顺序不当如会影响数据库系统的正确性事务并发控制基本原理事务调度可串行化相互冲突的操作串行执行非冲突的操作并行交错执行动机可串行化可串行化是判断并发调度是否正确的标准如可串行化目的判断一个并发事务调度是否正确标准是否等价于某个串行调度基本假设每个事务都保持数据库一致性事务的串行执行保持数据库一致性定义如果一个调度等价于某个串行调度则称是可串行化的可串行化调度的类型冲突等价冲突可串行化视图等价视图可串行化将对调度正确性的判断转换为对可串行性的判断冲突可串行化考虑两个事务和以及它们的调度定义事务的指令和事务的指令是冲突的当且仅当它们访问同一个数据项并且至少有一个指令是即冲突冲突冲突不冲突冲突等价定义如果调度可以通过一系列交换非冲突指令的操作转换成调度则称和是冲突等价的示例和是冲突等价的交换了的和的不它们是冲突的实际上中的和的是冲突操作不能交换需要检查具体指令此例意在说明概念冲突可串行化定义如果一个并发调度是冲突等价于某个串行调度的则称是冲突可串行化的注意只允许交换分属两个不同事务的操作交换不能改变每个事务内部指令的顺序例如不允许交换内部的和交换不能改变调度中冲突指令的执行顺序例如不允许交换的和的如果它们冲突存在一些调度它们不是冲突可串行化的示例冲突可串行化的判定方法方法从给定的并发调度开始保持中冲突操作的执行顺序交换中非冲突操作的执行顺序观察是否能得到一个串行调度方法使用前驱图示例判定冲突可串行化给定调度涉及时间答案等价于串行调度通过分析冲突边得出构建冲突可串行化调度构建一个与可串行化调度冲突等价的串行调度从给定的调度开始保持中冲突操作的执行顺序交换中非冲突操作的执行顺序得到一个冲突可串行化的事务隔离性与原子性考虑故障的调度两种需要考虑故障的调度特性可恢复调度无级联回滚调度可恢复性当事务失败时要求当事务失败时已经执行的依赖于的事务也应该被回滚撤销中止取消读取了由写入的数据目的是确保原子性可恢复调度定义一个调度是可恢复的如果对于每一对事务和满足如果读取了之前由写入的数据项那么的操作必须在的操作之前出现故障回滚点依赖于当需要中止回滚时由于尚未提交也尚未提交因此可以回滚中的操作也随之被撤销示例不可恢复调度违反完整性约束表约束表事务插入一条记录然后更新所有成绩加从计算每门课最高分插入问题的更新操作可能违反约束如导致回滚但如果在回滚之前已经提交它读取了更新后的中间数据可能包括违反约束的并基于此计算了这个错误结果被持久化即使后来回滚的错误结果也无法撤销因为已提交这违反了数据库一致性中的回滚设置指定当语句产生运行时错误时是否自动回滚当前事务为时如果任何语句产生运行时错误整个事务将终止并回滚为时默认只回滚产生错误的单个语句而事务将继续处理后续语句提高事务执行效率但可能破坏事务原子性示例在模式下一个事务包含和可能违反约束的如果失败回滚可能仍然成功提交不满足原子性设置为可解决此问题示例不可恢复调度简单读写是不可恢复的如果在之后立即提交如果在提交之后才中止数据项的值将被回滚到执行前的旧值但是已经读取了的新值并且已经提交了的提交无法撤销导致数据不一致无级联回滚调度定义级联回滚单个事务的失败导致一系列事务回滚示例导致回滚级联回滚级联回滚在提交之前读取了当因故障回滚时应该回滚进而导致回滚级联回滚是不希望的因为它导致大量工作被撤销无级联回滚调度定义无级联回滚调度是不会发生级联回滚的调度对于任意一对事务和如果读取了之前由写入的数据项那么的操作必须在的操作之前出现只读取已提交事务所修改的不会再发生变化的数据无级联回滚调度是并发事务的期望特性无级联回滚调度示例可恢复调度示例关系无级联回滚调度必定是可恢复调度但可恢复调度不一定是无级联回滚调度例题分析考虑事务在调度下并发访问关系表和问题为构建前驱图是否是可串行化调度如果不是说明原因是否是可恢复调度为什么是否是无级联回滚调度为什么给定调度的操作顺序详见课件第页表格涉及对表的更新和读取对表的更新和读取以及各事务的顺序分析结果根据课件第页前驱图存在从到的冲突边修改的随后读取它分析其他冲突边后可构建图图中应无回路可串行化是前驱图中无回路因此是冲突可串行化的可恢复性不是因为读取了修改但尚未提交的而的操作早于的如果后来回滚已提交的读取结果无法撤销无级联回滚不是因为它不是可恢复调度且读取了未提交的数据附录中的事务三种事务执行模式显式事务由和或界定由用户应用程序定义由用户显式控制例如账户转账事务自动提交事务默认模式在此模式下每条单独的语句本身就是一个事务语句成功完成则提交失败则回滚该语句例如如果导致某成绩超过而违反约束则该语句被回滚隐性事务通过设置在此模式下事务无需用显式开始当前事务以或结束时系统自动开始下一个事务形成连续的事务链每个事务仍需要显式结束批处理中的事务批处理包含一个或多个语句的组从客户端一次性发送到服务器执行事务与批的关系多对多一个事务可包含多个批一个批中也可有多个事务默认行为当批中的某些语句执行出错时停止执行当前及后续语句但出错前已成功执行的语句有效不会被回滚这可能破坏事务原子性确保原子性在批提交前使用这样任何运行时错误都会导致整个事务回滚示例对比成功违反约束回滚但结果保留违反原子性违反约束整个事务包括回滚保证原子性附录保存点语句在事务执行过程中定义中间点状态使用保存点可以将相关语句分组标识事务内的重要状态语句可以撤销该保存点之后的所有更改将事务的执行回退到之前的状态示例图王菲定义保存点王菲章立回滚到保存点注意到仅撤销了操作而操作不被撤销数据库恢复到执行前的状态新插入的元组仍然存在数据库实例变化图事务开始前执行后执行后删除了王菲和章立到保存点后恢复了被删除的王菲和章立第章事务大纲概要事务概念与特性事务概念读写输入输出特性简单事务模型事务原子性与持久性事务状态模型与特性保障多事务并发执行事务隔离性可串行化正确的并发调度无故障时正确的并发调度考虑故障时事务隔离性与原子性可恢复调度与无级联回滚调度事务在中的实现事务隔离级别一致性与并发性的权衡隔离级别的实现锁时间戳多版本与快照隔离语句中的事务附录中的事务保存点注课件末尾列出了等章节标题但具体内容未在提供的中展开',
+  pageFillDescription: ' 第17章：事务管理,  第5部分：事务管理,  事务管理,  17.1 事务概念,  定义1,  定义2,  事务：由读写元操作定义【逻辑读、逻辑写】,  包含回滚的事务,  SQL语句 vs. 读写元操作,  SQL Server中的事务示例,  17.2 事务模型,  事务模型中的操作定义,  事务读写操作示意图,  资金转账示例,  ACID特性详解,  1. 一致性,  2. 原子性,  3. 隔离性,  4. 持久性,  ACID特性的保障机制,  17.4 事务原子性与持久性（状态模型）,  关键定义,  事务状态（生命周期）,  事务状态图 (图17.1),  成功提交的事务流程,  回滚的事务流程,  事务状态详述,  示例：事务中的回滚,  17.5 事务隔离,  并发事务的调度,  并发执行与调度,  示例：并发调度分析,  串行调度 S1 (T₁ T₂),  串行调度 S2 (T₂ T₁),  并发调度 S3,  并发调度 S4,  为什么S3正确而S4错误？,  17.6 可串行化,  可串行化,  冲突可串行化,  冲突等价,  冲突可串行化,  冲突可串行化的判定方法,  示例1：判定冲突可串行化,  构建冲突可串行化调度,  17.7 事务隔离性与原子性（考虑故障的调度）,  可恢复调度,  示例1：不可恢复调度（违反完整性约束）,  SQL Server中的回滚设置：SET XACT_ABORT,  示例2：不可恢复调度（简单读写）,  无级联回滚调度,  无级联回滚调度,  例题分析,  附录 17-1 SQL Server 中的事务,  三种事务执行模式,  SQL Server 批处理中的事务,  附录 17-2 保存点,  第17章 事务：大纲概要,  I. 事务概念与特性,  II. 事务原子性与持久性,  III. 多事务并发执行,  IV. 正确的并发调度（考虑故障时）,  V. 事务在SQL中的实现第章事务管理第部分事务管理对数据库的单用户访问体现为一个或多个事务的执行例如事务是数据库应用系统的基本逻辑单元也是管理数据库系统的基本单位对数据库的多用户并发访问体现为一个或多个事务的并发执行事务管理多个事务并发访问共享数据项为保证数据正确性必须满足特性原子性一致性隔离性持久性的恢复管理组件负责保障原子性和持久性的并发控制组件负责保障隔离性和一致性事务概念定义事务是数据库应用系统的一个单元用于执行对数据库中各种数据项的访问和更新定义一个事务由一组操作构成这些操作由特定的语句界定和操作对数据库的读或写或事务由应用程序发起这些程序可以用以下语言编写数据操作语言如编程语言如嵌入了数据库访问的事务由读写元操作定义逻辑读逻辑写示例账户转账从账户转账到账户需要处理的问题故障例如硬件故障和系统崩溃多个事务的并发执行包含回滚的事务撤销之前对的修改即恢复的原始值并立即终止不再执行其后的操作语句读写元操作语句可以分解为读和写操作示例表语句对应的读写操作语句对应的读写操作中的事务示例事务变量定义事务命名事务开始打开数据库将批处理语句提交给修改账户修改账户事务提交事务模型每个数据访问如中的都会被转换分解为读和写操作执行读写操作以实现事务中的数据访问在主存中分配局部缓冲区作为工作区域数据库持久驻留在磁盘上但部分数据会暂时驻留在主存的缓冲区中事务模型中的操作定义定义将数据项从磁盘上的数据库文件或磁盘缓冲区传输到执行该读操作的事务所属局部缓冲区中的一个变量也称为中定义将局部缓冲区中变量的值传输回磁盘上数据库文件中对应的数据项注意写操作不会立即更新磁盘上的数据它可能暂时存储在磁盘缓冲区中事务读写操作示意图示例表中的字段事务发出的对数据项和的数据访问如等为事务分配的局部缓冲区变量逻辑读写磁盘缓冲区中的数据项块物理读写反映持久化磁盘上的数据库文件在检查点或提交时写回资金转账示例示例从账户转账到账户的事务步骤的值的值初始值特性详解一致性事务在隔离状态下执行能够保持数据库的一致性在事务执行前后数据库都处于正确的状态事务的正确执行使得数据库从一个正确状态转移到另一个正确状态数据库状态数据库中表的内容或数据库实例一致性正确性定义示例完整性约束未被违反一致性要求示例和的总和保持不变即一致性要求包括显式的完整性约束如主键和外键隐式的完整性约束例如所有账户余额总和减去所有贷款金额总和必须等于手头现金价值在事务执行过程中数据库可能暂时处于不一致状态例如在上述转账示例的第步之后第步之前当事务成功完成时数据库必须是一致的原子性事务中的所有操作要么全部反映持久化到数据库要么一个都不反映事务中所有操作或者全部成功完成并且这些操作结果被写入数据库或者事务中的所有操作一个都不做该事务对数据库和其他事务没有任何影响确保部分执行的事务的更新不会被反映到数据库中隔离性定义即使多个事务并发执行所有事务看起来都像是在串行执行从而保持了一致性每个事务都不知道其他事务正在并发执行对于并发执行的事务一个事务的执行不能被其他事务干扰即一个事务内部的操作和数据对其他事务是隔离的并发执行的事务之间不能相互干扰从执行结果来看相当于事务串行执行隔离性保证了多个事务并发执行的正确性并发控制机制确保了隔离性示例如果在转账事务的第步和第步之间允许另一个事务访问部分更新的数据库将看到一个不一致的数据库总和为通过串行地运行事务一个接一个可以确保隔离性持久性定义一旦事务完成该事务对数据库的更新必须持久保持即使发生软件或硬件故障缓冲区中数据项的修改值应该反映写入到磁盘上的数据库文件中事务一旦提交成功完成对数据库数据的改变是永久性的即持久化示例的转账已经发生即使发生软件或硬件故障该事务对数据库的更新也必须持久保持示例对于图中的事务开始时局部缓冲区和磁盘缓冲区中执行后局部缓冲区中执行后局部缓冲区中提交时磁盘缓冲区中最终磁盘上的数据库文件中特性的保障机制数据库系统中的保障机制原子性由事务管理恢复管理组件保障一致性由完整性约束和中的测试机制保障隔离性由并发控制组件保障持久性由恢复管理组件保障事务原子性与持久性状态模型关键定义定义如果一个事务可能无法成功完成其执行则称其为中止定义如果一个事务成功完成其执行则称其为提交定义一旦一个已中止事务所做的更改被撤销则该事务被称为回滚定义如果一个事务已提交或已中止则称其已终止事务状态生命周期活动初始状态部分提交在最终语句通常是被执行之后失败正常执行无法再继续进行中止在事务已回滚且数据库恢复到事务开始前的状态之后中止后的两个选项重启事务仅当没有内部逻辑错误时终止事务提交在成功完成之后事务状态图图失败最终操作执行提交回滚或发生故障回滚完成重启可选成功提交的事务流程操作分配资源如局部缓冲区创建并启动事务执行操作等将数据反映到磁盘持久化释放资源结束事务状态流活动部分提交已提交回滚的事务流程故障回滚操作分配资源如局部缓冲区创建并启动事务执行操作发生故障触发回滚回滚撤销或重做之前的操作释放资源结束事务状态流活动失败中止事务状态详述活动初始状态事务从开始执行时处于此状态事务被创建在提交后例如为事务分配了局部缓冲区注意事务操作被执行但操作对数据库发出的修改可能只临时存储在磁盘缓冲区中并未立即反映到磁盘上的数据库文件部分提交在最终语句提交后事务进入此状态事务操作产生的影响从磁盘缓冲区反映到数据库文件持久化已提交在所有操作成功完成后事务进入此状态所有结果已在部分提交状态反映到数据库文件事务释放所占用的资源终止退出数据库系统其生命周期结束失败如果发现正常执行无法继续进行事务进入此状态事务被回滚以将数据库恢复到事务开始前的状态在此状态下进行失败处理工作中止在失败状态下事务被回滚后数据库已恢复到事务开始前的状态事务进入此状态以结束事务释放所占用的资源向其用户报告事务已中止终止退出数据库系统其生命周期结束表示已完成失败处理工作事务将要退出系统示例事务中的回滚定义回滚撤销到目前为止事务已经对数据库所做的所有修改数据库状态恢复到事务开始前的状态示例定义表定义更新事务回滚过程初始实例例如发生故障时的实例执行更新后变为违反完整性约束回滚后的实例撤销所有更新恢复到初始状态即事务隔离并发事务的调度事务的并发执行允许高吞吐量和资源利用率减少等待时间例如多用户订票系统允许事务并发的缺点事务包含对共享数据的操作不同的调度可能导致不同的最终数据库状态需要并发控制方案和事务调度并发执行与调度定义对一组并发事务的调度规定了并发事务操作的执行顺序包含事务的所有操作保持每个独立事务内部操作的顺序注意成功执行的事务将以指令作为最后一条语句执行失败的事务将以指令作为最后一条语句示例并发调度分析事务从转账到从转账余额的到初始值串行调度最终结果串行调度最终结果结论调度和导致共享数据项和的最终值不同但都是正确的调度因为都保持了总和不变并发调度将对的两次写操作对的两次写操作安排在相近时间执行利于在时刻通过一次操作一次性将的修改结果写回数据库文件减少写操作次数将对的两次读操作对的两次读操作安排在相近时间执行有利于减少读操作次数第二次可从磁盘缓冲区读取最终结果与结果相同并发调度假设直接从磁盘上的数据库文件读取数据最终结果错误为什么正确而错误等价于和对共享数据和的访问实质上是串行的与串行调度的执行结果相同等价于串行调度不等价于和以交错的方式操作共享数据和与串行调度的执行结果不同不等价于任何串行调度使数据库处于不一致状态注意隔离性和一致性被违反可串行化多个事务串行执行可以保证事务的特性如但执行效率低多个事务并发执行时如果事务操作调度顺序不当如会影响数据库系统的正确性事务并发控制基本原理事务调度可串行化相互冲突的操作串行执行非冲突的操作并行交错执行动机可串行化可串行化是判断并发调度是否正确的标准如可串行化目的判断一个并发事务调度是否正确标准是否等价于某个串行调度基本假设每个事务都保持数据库一致性事务的串行执行保持数据库一致性定义如果一个调度等价于某个串行调度则称是可串行化的可串行化调度的类型冲突等价冲突可串行化视图等价视图可串行化将对调度正确性的判断转换为对可串行性的判断冲突可串行化考虑两个事务和以及它们的调度定义事务的指令和事务的指令是冲突的当且仅当它们访问同一个数据项并且至少有一个指令是即冲突冲突冲突不冲突冲突等价定义如果调度可以通过一系列交换非冲突指令的操作转换成调度则称和是冲突等价的示例和是冲突等价的交换了的和的不它们是冲突的实际上中的和的是冲突操作不能交换需要检查具体指令此例意在说明概念冲突可串行化定义如果一个并发调度是冲突等价于某个串行调度的则称是冲突可串行化的注意只允许交换分属两个不同事务的操作交换不能改变每个事务内部指令的顺序例如不允许交换内部的和交换不能改变调度中冲突指令的执行顺序例如不允许交换的和的如果它们冲突存在一些调度它们不是冲突可串行化的示例冲突可串行化的判定方法方法从给定的并发调度开始保持中冲突操作的执行顺序交换中非冲突操作的执行顺序观察是否能得到一个串行调度方法使用前驱图示例判定冲突可串行化给定调度涉及时间答案等价于串行调度通过分析冲突边得出构建冲突可串行化调度构建一个与可串行化调度冲突等价的串行调度从给定的调度开始保持中冲突操作的执行顺序交换中非冲突操作的执行顺序得到一个冲突可串行化的事务隔离性与原子性考虑故障的调度两种需要考虑故障的调度特性可恢复调度无级联回滚调度可恢复性当事务失败时要求当事务失败时已经执行的依赖于的事务也应该被回滚撤销中止取消读取了由写入的数据目的是确保原子性可恢复调度定义一个调度是可恢复的如果对于每一对事务和满足如果读取了之前由写入的数据项那么的操作必须在的操作之前出现故障回滚点依赖于当需要中止回滚时由于尚未提交也尚未提交因此可以回滚中的操作也随之被撤销示例不可恢复调度违反完整性约束表约束表事务插入一条记录然后更新所有成绩加从计算每门课最高分插入问题的更新操作可能违反约束如导致回滚但如果在回滚之前已经提交它读取了更新后的中间数据可能包括违反约束的并基于此计算了这个错误结果被持久化即使后来回滚的错误结果也无法撤销因为已提交这违反了数据库一致性中的回滚设置指定当语句产生运行时错误时是否自动回滚当前事务为时如果任何语句产生运行时错误整个事务将终止并回滚为时默认只回滚产生错误的单个语句而事务将继续处理后续语句提高事务执行效率但可能破坏事务原子性示例在模式下一个事务包含和可能违反约束的如果失败回滚可能仍然成功提交不满足原子性设置为可解决此问题示例不可恢复调度简单读写是不可恢复的如果在之后立即提交如果在提交之后才中止数据项的值将被回滚到执行前的旧值但是已经读取了的新值并且已经提交了的提交无法撤销导致数据不一致无级联回滚调度定义级联回滚单个事务的失败导致一系列事务回滚示例导致回滚级联回滚级联回滚在提交之前读取了当因故障回滚时应该回滚进而导致回滚级联回滚是不希望的因为它导致大量工作被撤销无级联回滚调度定义无级联回滚调度是不会发生级联回滚的调度对于任意一对事务和如果读取了之前由写入的数据项那么的操作必须在的操作之前出现只读取已提交事务所修改的不会再发生变化的数据无级联回滚调度是并发事务的期望特性无级联回滚调度示例可恢复调度示例关系无级联回滚调度必定是可恢复调度但可恢复调度不一定是无级联回滚调度例题分析考虑事务在调度下并发访问关系表和问题为构建前驱图是否是可串行化调度如果不是说明原因是否是可恢复调度为什么是否是无级联回滚调度为什么给定调度的操作顺序详见课件第页表格涉及对表的更新和读取对表的更新和读取以及各事务的顺序分析结果根据课件第页前驱图存在从到的冲突边修改的随后读取它分析其他冲突边后可构建图图中应无回路可串行化是前驱图中无回路因此是冲突可串行化的可恢复性不是因为读取了修改但尚未提交的而的操作早于的如果后来回滚已提交的读取结果无法撤销无级联回滚不是因为它不是可恢复调度且读取了未提交的数据附录中的事务三种事务执行模式显式事务由和或界定由用户应用程序定义由用户显式控制例如账户转账事务自动提交事务默认模式在此模式下每条单独的语句本身就是一个事务语句成功完成则提交失败则回滚该语句例如如果导致某成绩超过而违反约束则该语句被回滚隐性事务通过设置在此模式下事务无需用显式开始当前事务以或结束时系统自动开始下一个事务形成连续的事务链每个事务仍需要显式结束批处理中的事务批处理包含一个或多个语句的组从客户端一次性发送到服务器执行事务与批的关系多对多一个事务可包含多个批一个批中也可有多个事务默认行为当批中的某些语句执行出错时停止执行当前及后续语句但出错前已成功执行的语句有效不会被回滚这可能破坏事务原子性确保原子性在批提交前使用这样任何运行时错误都会导致整个事务回滚示例对比成功违反约束回滚但结果保留违反原子性违反约束整个事务包括回滚保证原子性附录保存点语句在事务执行过程中定义中间点状态使用保存点可以将相关语句分组标识事务内的重要状态语句可以撤销该保存点之后的所有更改将事务的执行回退到之前的状态示例图王菲定义保存点王菲章立回滚到保存点注意到仅撤销了操作而操作不被撤销数据库恢复到执行前的状态新插入的元组仍然存在数据库实例变化图事务开始前执行后执行后删除了王菲和章立到保存点后恢复了被删除的王菲和章立第章事务大纲概要事务概念与特性事务概念读写输入输出特性简单事务模型事务原子性与持久性事务状态模型与特性保障多事务并发执行事务隔离性可串行化正确的并发调度无故障时正确的并发调度考虑故障时事务隔离性与原子性可恢复调度与无级联回滚调度事务在中的实现事务隔离级别一致性与并发性的权衡隔离级别的实现锁时间戳多版本与快照隔离语句中的事务附录中的事务保存点注课件末尾列出了等章节标题但具体内容未在提供的中展开',
   isPost: true,
   isHome: false,
   isHighlightShrink: false,
@@ -244,17 +244,22 @@ setTimeout(function(){preloader.endLoading();},10000)
 if (true) {
   document.addEventListener('pjax:send', () => { preloader.initLoading() })
   document.addEventListener('pjax:complete', () => { preloader.endLoading() })
-}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">Yuejin's Blog</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 1.05rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 1.05rem;">Database<sup>12</sup></a><a href="/tags/English/" style="font-size: 1.05rem;">English<sup>1</sup></a><a href="/tags/RNN/" style="font-size: 1.05rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 1.05rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 1.05rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 1.05rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 1.05rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 1.05rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">20</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url">数据库</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Database/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Database</span></a></span></div></div><h1 class="post-title" itemprop="name headline">§17 Transaction 解读</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-12-27T17:32:13.329Z" title="发表于 2025-12-28 01:32:13">2025-12-28</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-12-27T17:33:31.970Z" title="更新于 2025-12-28 01:33:31">2025-12-28</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为北京"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>北京</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="/img/C7_cover.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/12/28/DB_Transaction/"><header><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url">数据库</a><a href="/tags/Database/" tabindex="-1" itemprop="url">Database</a><h1 id="CrawlerTitle" itemprop="name headline">§17 Transaction 解读</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">Yuejin Wu</span><time itemprop="dateCreated datePublished" datetime="2025-12-27T17:32:13.329Z" title="发表于 2025-12-28 01:32:13">2025-12-28</time><time itemprop="dateCreated datePublished" datetime="2025-12-27T17:33:31.970Z" title="更新于 2025-12-28 01:33:31">2025-12-28</time></header><h3 id="第17章：事务管理"><a href="#第17章：事务管理" class="headerlink" title="第17章：事务管理"></a>第17章：事务管理</h3><h2 id="第5部分：事务管理"><a href="#第5部分：事务管理" class="headerlink" title="第5部分：事务管理"></a>第5部分：事务管理</h2><ul>
-<li>对数据库的单用户访问体现为一个或多个<strong>事务</strong>的执行。<ul>
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">Yuejin's Blog</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 1.05rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 1.05rem;">Database<sup>12</sup></a><a href="/tags/English/" style="font-size: 1.05rem;">English<sup>1</sup></a><a href="/tags/RNN/" style="font-size: 1.05rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 1.05rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 1.05rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 1.05rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 1.05rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 1.05rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">20</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url">数据库</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Database/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Database</span></a></span></div></div><h1 class="post-title" itemprop="name headline">§17 Transaction 解读</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-12-27T17:32:13.329Z" title="发表于 2025-12-28 01:32:13">2025-12-28</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-12-27T17:33:31.970Z" title="更新于 2025-12-28 01:33:31">2025-12-28</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为北京"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>北京</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="/img/C7_cover.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/12/28/DB_Transaction/"><header><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url">数据库</a><a href="/tags/Database/" tabindex="-1" itemprop="url">Database</a><h1 id="CrawlerTitle" itemprop="name headline">§17 Transaction 解读</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">Yuejin Wu</span><time itemprop="dateCreated datePublished" datetime="2025-12-27T17:32:13.329Z" title="发表于 2025-12-28 01:32:13">2025-12-28</time><time itemprop="dateCreated datePublished" datetime="2025-12-27T17:33:31.970Z" title="更新于 2025-12-28 01:33:31">2025-12-28</time></header><h3 id="第17章事务管理"><a class="markdownIt-Anchor" href="#第17章事务管理"></a> 第17章：事务管理</h3>
+<h2 id="第5部分事务管理"><a class="markdownIt-Anchor" href="#第5部分事务管理"></a> 第5部分：事务管理</h2>
+<ul>
+<li>对数据库的单用户访问体现为一个或多个<strong>事务</strong>的执行。
+<ul>
 <li>例如：<code>SELECT</code>, <code>INSERT</code>, <code>DELETE</code>, <code>UPDATE</code>。</li>
 <li>事务是数据库应用系统的基本逻辑单元，也是DBMS管理数据库系统的基本单位。</li>
 </ul>
 </li>
 <li>对数据库的多用户并发访问体现为一个或多个事务的<strong>并发执行</strong>。</li>
 </ul>
-<hr>
-<h2 id="事务管理"><a href="#事务管理" class="headerlink" title="事务管理"></a>事务管理</h2><ul>
-<li>多个事务并发访问共享数据项 <code>Q</code>，为保证数据正确性，必须满足<strong>ACID</strong>特性：<ul>
+<hr />
+<h2 id="事务管理"><a class="markdownIt-Anchor" href="#事务管理"></a> 事务管理</h2>
+<ul>
+<li>多个事务并发访问共享数据项 <code>Q</code>，为保证数据正确性，必须满足<strong>ACID</strong>特性：
+<ul>
 <li>原子性</li>
 <li>一致性</li>
 <li>隔离性</li>
@@ -264,52 +269,60 @@ if (true) {
 <li>DBMS的<strong>恢复管理</strong>组件负责保障原子性和持久性。</li>
 <li>DBMS的<strong>并发控制</strong>组件负责保障隔离性和一致性。</li>
 </ul>
-<hr>
-<h2 id="17-1-事务概念"><a href="#17-1-事务概念" class="headerlink" title="17.1 事务概念"></a>17.1 事务概念</h2><h3 id="定义1"><a href="#定义1" class="headerlink" title="定义1"></a>定义1</h3><p>事务是数据库应用系统的一个单元，用于执行对数据库中各种数据项的<strong>访问</strong>和<strong>更新</strong>。</p>
-<h3 id="定义2"><a href="#定义2" class="headerlink" title="定义2"></a>定义2</h3><p>一个事务由一组操作构成，这些操作由特定的语句界定：</p>
+<hr />
+<h2 id="171-事务概念"><a class="markdownIt-Anchor" href="#171-事务概念"></a> 17.1 事务概念</h2>
+<h3 id="定义1"><a class="markdownIt-Anchor" href="#定义1"></a> 定义1</h3>
+<p>事务是数据库应用系统的一个单元，用于执行对数据库中各种数据项的<strong>访问</strong>和<strong>更新</strong>。</p>
+<h3 id="定义2"><a class="markdownIt-Anchor" href="#定义2"></a> 定义2</h3>
+<p>一个事务由一组操作构成，这些操作由特定的语句界定：</p>
 <ul>
 <li><code>BEGIN TRANSACTION</code> 和 <code>END TRANSACTION</code>。</li>
-<li>操作：对数据库的读或写。<ul>
-<li><code>BEGIN TRANSACTION</code><br><code>op₁; op₂; ...</code><br><code>END TRANSACTION</code> <strong>(COMMIT</strong> 或 <strong>ABORT&#x2F;ROLLBACK)</strong>。</li>
+<li>操作：对数据库的读或写。
+<ul>
+<li><code>BEGIN TRANSACTION</code><br />
+<code>op₁; op₂; ...</code><br />
+<code>END TRANSACTION</code> <strong>(COMMIT</strong> 或 <strong>ABORT/ROLLBACK)</strong>。</li>
 </ul>
 </li>
-<li>事务由应用程序发起，这些程序可以用以下语言编写：<ul>
+<li>事务由应用程序发起，这些程序可以用以下语言编写：
+<ul>
 <li>数据操作语言，如SQL。</li>
 <li>编程语言，如嵌入了数据库访问的C++。</li>
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="事务：由读写元操作定义【逻辑读、逻辑写】"><a href="#事务：由读写元操作定义【逻辑读、逻辑写】" class="headerlink" title="事务：由读写元操作定义【逻辑读、逻辑写】"></a>事务：由读写元操作定义【逻辑读、逻辑写】</h3><p><strong>示例1：账户转账 T1</strong>：从账户A转账$50到账户B。</p>
+<hr />
+<h3 id="事务由读写元操作定义逻辑读-逻辑写"><a class="markdownIt-Anchor" href="#事务由读写元操作定义逻辑读-逻辑写"></a> 事务：由读写元操作定义【逻辑读、逻辑写】</h3>
+<p><strong>示例1：账户转账 T1</strong>：从账户A转账$50到账户B。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">T1: begin-transaction</span><br><span class="line">    read (A);</span><br><span class="line">    A := A - 50;</span><br><span class="line">    write (A);</span><br><span class="line">    read (B);</span><br><span class="line">    B := B + 50;</span><br><span class="line">    write (B);</span><br><span class="line">end-transaction</span><br></pre></td></tr></table></figure>
-
 <p><strong>需要处理的问题</strong>：</p>
 <ul>
 <li>故障，例如硬件故障和系统崩溃。</li>
 <li>多个事务的并发执行。</li>
 </ul>
-<hr>
-<h3 id="包含回滚的事务"><a href="#包含回滚的事务" class="headerlink" title="包含回滚的事务"></a>包含回滚的事务</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">T2: begin-transaction</span><br><span class="line">    read (A);</span><br><span class="line">    A := A - 50;</span><br><span class="line">    if A &lt; 0 then</span><br><span class="line">    begin</span><br><span class="line">        print(&#x27;insufficient funds&#x27;)</span><br><span class="line">        rollback T2</span><br><span class="line">    end</span><br><span class="line">    else begin</span><br><span class="line">        write (A);</span><br><span class="line">        read (B);</span><br><span class="line">        B := B + 50;</span><br><span class="line">        write (B);</span><br><span class="line">        commit T2</span><br><span class="line">    end</span><br></pre></td></tr></table></figure>
-
+<hr />
+<h3 id="包含回滚的事务"><a class="markdownIt-Anchor" href="#包含回滚的事务"></a> 包含回滚的事务</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">T2: begin-transaction</span><br><span class="line">    read (A);</span><br><span class="line">    A := A - 50;</span><br><span class="line">    if A &lt; 0 then</span><br><span class="line">    begin</span><br><span class="line">        print(&#x27;insufficient funds&#x27;)</span><br><span class="line">        rollback T2</span><br><span class="line">    end</span><br><span class="line">    else begin</span><br><span class="line">        write (A);</span><br><span class="line">        read (B);</span><br><span class="line">        B := B + 50;</span><br><span class="line">        write (B);</span><br><span class="line">        commit T2</span><br><span class="line">    end</span><br></pre></td></tr></table></figure>
 <p><code>ROLLBACK/ABORT T2</code>：撤销之前对 <code>A</code> 的修改（即恢复 <code>A</code> 的原始值），并立即终止T2，不再执行其后的操作。</p>
-<hr>
-<h3 id="SQL语句-vs-读写元操作"><a href="#SQL语句-vs-读写元操作" class="headerlink" title="SQL语句 vs. 读写元操作"></a>SQL语句 vs. 读写元操作</h3><ul>
+<hr />
+<h3 id="sql语句-vs-读写元操作"><a class="markdownIt-Anchor" href="#sql语句-vs-读写元操作"></a> SQL语句 vs. 读写元操作</h3>
+<ul>
 <li>SQL语句可以分解为读和写操作。</li>
 <li><strong>示例</strong>：表 <code>SC(s#, c#, grade)</code>。</li>
 </ul>
 <ol>
-<li><p><strong>SQL语句</strong>:</p>
+<li>
+<p><strong>SQL语句</strong>:</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT INTO</span> MaxGrade(c#, maxG)</span><br><span class="line"><span class="keyword">SELECT</span> c#, <span class="built_in">MAX</span>(grade)</span><br><span class="line"><span class="keyword">FROM</span> SC</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> c#;</span><br></pre></td></tr></table></figure>
-
 <p><strong>对应的读写操作</strong>:</p>
 <ul>
 <li><code>read(SC(c#, grade))</code></li>
 <li><code>write(MaxGrade(c#, maxG))</code></li>
 </ul>
 </li>
-<li><p><strong>SQL语句</strong>:</p>
+<li>
+<p><strong>SQL语句</strong>:</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> SC</span><br><span class="line"><span class="keyword">SET</span> grade <span class="operator">=</span> grade <span class="operator">+</span> <span class="number">5</span></span><br><span class="line"><span class="keyword">WHERE</span> c# <span class="operator">=</span> <span class="number">301141</span>;</span><br></pre></td></tr></table></figure>
-
 <p><strong>对应的读写操作</strong>:</p>
 <ul>
 <li><code>read(SC.c#)</code></li>
@@ -318,9 +331,9 @@ if (true) {
 </ul>
 </li>
 </ol>
-<hr>
-<h3 id="SQL-Server中的事务示例"><a href="#SQL-Server中的事务示例" class="headerlink" title="SQL Server中的事务示例"></a>SQL Server中的事务示例</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DECLARE</span> <span class="variable">@transfer_name</span> <span class="type">VARCHAR</span>(<span class="number">10</span>)</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@transfer_name</span> <span class="operator">=</span> <span class="string">&#x27;I-transfer-from-A-to-B&#x27;</span></span><br><span class="line"><span class="keyword">BEGIN</span> TRANSACTION <span class="variable">@transfer_name</span></span><br><span class="line">USE ACCOUNT</span><br><span class="line">GO</span><br><span class="line"><span class="keyword">UPDATE</span> A</span><br><span class="line">    <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">50</span></span><br><span class="line">    <span class="keyword">WHERE</span> branch_name <span class="operator">=</span> <span class="string">&#x27;Brooklyn&#x27;</span></span><br><span class="line"><span class="keyword">UPDATE</span> B</span><br><span class="line">    <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> <span class="number">50</span></span><br><span class="line">    <span class="keyword">WHERE</span> branch_name <span class="operator">=</span> <span class="string">&#x27;Brooklyn&#x27;</span></span><br><span class="line">GO</span><br><span class="line"><span class="keyword">COMMIT</span> TRANSACTION <span class="variable">@transfer_name</span></span><br><span class="line">GO</span><br></pre></td></tr></table></figure>
-
+<hr />
+<h3 id="sql-server中的事务示例"><a class="markdownIt-Anchor" href="#sql-server中的事务示例"></a> SQL Server中的事务示例</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DECLARE</span> <span class="variable">@transfer_name</span> <span class="type">VARCHAR</span>(<span class="number">10</span>)</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@transfer_name</span> <span class="operator">=</span> <span class="string">&#x27;I-transfer-from-A-to-B&#x27;</span></span><br><span class="line"><span class="keyword">BEGIN</span> TRANSACTION <span class="variable">@transfer_name</span></span><br><span class="line">USE ACCOUNT</span><br><span class="line">GO</span><br><span class="line"><span class="keyword">UPDATE</span> A</span><br><span class="line">    <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">-</span> <span class="number">50</span></span><br><span class="line">    <span class="keyword">WHERE</span> branch_name <span class="operator">=</span> <span class="string">&#x27;Brooklyn&#x27;</span></span><br><span class="line"><span class="keyword">UPDATE</span> B</span><br><span class="line">    <span class="keyword">SET</span> balance <span class="operator">=</span> balance <span class="operator">+</span> <span class="number">50</span></span><br><span class="line">    <span class="keyword">WHERE</span> branch_name <span class="operator">=</span> <span class="string">&#x27;Brooklyn&#x27;</span></span><br><span class="line">GO</span><br><span class="line"><span class="keyword">COMMIT</span> TRANSACTION <span class="variable">@transfer_name</span></span><br><span class="line">GO</span><br></pre></td></tr></table></figure>
 <ul>
 <li>事务变量定义</li>
 <li>事务命名</li>
@@ -331,94 +344,106 @@ if (true) {
 <li>修改账户B</li>
 <li>事务提交</li>
 </ul>
-<hr>
-<h2 id="17-2-事务模型"><a href="#17-2-事务模型" class="headerlink" title="17.2 事务模型"></a>17.2 事务模型</h2><ul>
-<li>每个数据访问（如SQL中的<code>SELECT</code>, <code>UPDATE</code>）都会被<strong>转换&#x2F;分解</strong>为读和写操作。</li>
+<hr />
+<h2 id="172-事务模型"><a class="markdownIt-Anchor" href="#172-事务模型"></a> 17.2 事务模型</h2>
+<ul>
+<li>每个数据访问（如SQL中的<code>SELECT</code>, <code>UPDATE</code>）都会被<strong>转换/分解</strong>为读和写操作。</li>
 <li><strong>DBMS</strong>：执行读写操作以实现事务中的数据访问。</li>
 <li><strong>DBMS</strong>：在主存中分配<strong>局部缓冲区</strong>作为工作区域。</li>
 <li>数据库持久驻留在磁盘上，但部分数据会暂时驻留在主存的缓冲区中。</li>
 </ul>
-<hr>
-<h3 id="事务模型中的操作定义"><a href="#事务模型中的操作定义" class="headerlink" title="事务模型中的操作定义"></a>事务模型中的操作定义</h3><ul>
-<li><p><strong>定义：<code>read(X)</code></strong></p>
+<hr />
+<h3 id="事务模型中的操作定义"><a class="markdownIt-Anchor" href="#事务模型中的操作定义"></a> 事务模型中的操作定义</h3>
+<ul>
+<li>
+<p><strong>定义：<code>read(X)</code></strong></p>
 <ul>
 <li>将数据项 <code>X</code> 从磁盘上的数据库文件（或磁盘缓冲区）<strong>传输</strong>到执行该读操作的事务所属局部缓冲区中的一个变量（也称为 <code>X</code>）中。</li>
 </ul>
 </li>
-<li><p><strong>定义：<code>write(X)</code></strong></p>
+<li>
+<p><strong>定义：<code>write(X)</code></strong></p>
 <ul>
 <li>将局部缓冲区中变量 <code>X</code> 的值<strong>传输</strong>回磁盘上数据库文件中对应的数据项 <code>X</code>。</li>
 </ul>
 </li>
-<li><p><strong>注意</strong>：<br>写操作不会立即更新磁盘上的数据。它可能暂时存储在磁盘缓冲区中。</p>
+<li>
+<p><strong>注意</strong>：<br />
+写操作不会立即更新磁盘上的数据。它可能暂时存储在磁盘缓冲区中。</p>
 </li>
 </ul>
-<hr>
-<h3 id="事务读写操作示意图"><a href="#事务读写操作示意图" class="headerlink" title="事务读写操作示意图"></a>事务读写操作示意图</h3><p><strong>示例</strong>：<code>Instructor</code> 表中的 <code>name</code> 字段。</p>
+<hr />
+<h3 id="事务读写操作示意图"><a class="markdownIt-Anchor" href="#事务读写操作示意图"></a> 事务读写操作示意图</h3>
+<p><strong>示例</strong>：<code>Instructor</code> 表中的 <code>name</code> 字段。</p>
 <ul>
 <li>事务 T₁ 发出的对数据项 <code>x</code> 和 <code>y</code> 的数据访问（如 <code>SELECT</code>, <code>INSERT</code>, <code>DELETE</code>, <code>UPDATE</code> 等）。</li>
 <li>DBMS为事务T₁分配的局部缓冲区变量 <code>x₁</code>, <code>y₁</code>。</li>
 <li><strong>逻辑读写</strong>：<code>read(x)</code>, <code>write(y)</code>。</li>
 <li><strong>磁盘缓冲区</strong>中的数据项块：<code>Bₓ</code>, <code>Bᵧ</code>, …, <code>B_z</code>。</li>
-<li><strong>物理读写</strong>：<code>input(X)</code>, <code>output(Y)</code> &#x2F; 反映 &#x2F; 持久化。</li>
+<li><strong>物理读写</strong>：<code>input(X)</code>, <code>output(Y)</code> / 反映 / 持久化。</li>
 <li><strong>磁盘上的数据库文件</strong>：<code>Bₓ</code>, <code>Bᵧ</code>, …, <code>B_z</code>, <code>B_w</code>; <code>Bᵤ</code>, <code>Bᵥ</code>, …, <code>B_q</code>, <code>Bᵣ</code>（在检查点或提交时写回）。</li>
 </ul>
-<hr>
-<h3 id="资金转账示例"><a href="#资金转账示例" class="headerlink" title="资金转账示例"></a>资金转账示例</h3><p><strong>示例</strong>：从账户A转账$50到账户B的事务。</p>
+<hr />
+<h3 id="资金转账示例"><a class="markdownIt-Anchor" href="#资金转账示例"></a> 资金转账示例</h3>
+<p><strong>示例</strong>：从账户A转账$50到账户B的事务。</p>
 <table>
 <thead>
 <tr>
-<th align="left">步骤</th>
-<th align="left">A的值</th>
-<th align="left">B的值</th>
-<th align="left">A + B</th>
+<th style="text-align:left">步骤</th>
+<th style="text-align:left">A的值</th>
+<th style="text-align:left">B的值</th>
+<th style="text-align:left">A + B</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">初始值</td>
-<td align="left">1000</td>
-<td align="left">2000</td>
-<td align="left">3000</td>
+<tbody>
+<tr>
+<td style="text-align:left">初始值</td>
+<td style="text-align:left">1000</td>
+<td style="text-align:left">2000</td>
+<td style="text-align:left">3000</td>
 </tr>
 <tr>
-<td align="left">1. <code>read(A)</code></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
+<td style="text-align:left">1. <code>read(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">2. <code>A := A - 50</code></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
+<td style="text-align:left">2. <code>A := A - 50</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">3. <code>write(A)</code></td>
-<td align="left">950</td>
-<td align="left">2000</td>
-<td align="left">2950</td>
+<td style="text-align:left">3. <code>write(A)</code></td>
+<td style="text-align:left">950</td>
+<td style="text-align:left">2000</td>
+<td style="text-align:left">2950</td>
 </tr>
 <tr>
-<td align="left">4. <code>read(B)</code></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
+<td style="text-align:left">4. <code>read(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">5. <code>B := B + 50</code></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
+<td style="text-align:left">5. <code>B := B + 50</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">6. <code>write(B)</code></td>
-<td align="left">950</td>
-<td align="left">2050</td>
-<td align="left"><strong>3000</strong></td>
+<td style="text-align:left">6. <code>write(B)</code></td>
+<td style="text-align:left">950</td>
+<td style="text-align:left">2050</td>
+<td style="text-align:left"><strong>3000</strong></td>
 </tr>
-</tbody></table>
-<hr>
-<h2 id="ACID特性详解"><a href="#ACID特性详解" class="headerlink" title="ACID特性详解"></a>ACID特性详解</h2><h3 id="1-一致性"><a href="#1-一致性" class="headerlink" title="1. 一致性"></a>1. 一致性</h3><ul>
+</tbody>
+</table>
+<hr />
+<h2 id="acid特性详解"><a class="markdownIt-Anchor" href="#acid特性详解"></a> ACID特性详解</h2>
+<h3 id="1-一致性"><a class="markdownIt-Anchor" href="#1-一致性"></a> 1. 一致性</h3>
+<ul>
 <li>事务在<strong>隔离</strong>状态下执行能够<strong>保持</strong>数据库的<strong>一致性</strong>。在事务执行前后，数据库都处于正确的状态。</li>
 <li>事务的正确执行使得数据库从一个正确状态转移到另一个正确状态。</li>
 <li><strong>数据库状态</strong>：数据库中表的内容或数据库实例。</li>
@@ -426,92 +451,107 @@ if (true) {
 <table>
 <thead>
 <tr>
-<th align="left">一致性&#x2F;正确性定义示例：</th>
+<th style="text-align:left">一致性/正确性定义示例：</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">A&#x3D;1000, B&#x3D;2000， A+B&#x3D;3000</td>
+<tbody>
+<tr>
+<td style="text-align:left">A=1000, B=2000， A+B=3000</td>
 </tr>
 <tr>
-<td align="left">完整性约束未被违反。</td>
+<td style="text-align:left">完整性约束未被违反。</td>
 </tr>
 <tr>
-<td align="left"><strong>一致性要求示例</strong>：A和B的总和保持不变，即 <code>A + B = 3000</code>。</td>
+<td style="text-align:left"><strong>一致性要求示例</strong>：A和B的总和保持不变，即 <code>A + B = 3000</code>。</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <ul>
-<li><strong>一致性要求</strong>包括：<ul>
+<li><strong>一致性要求</strong>包括：
+<ul>
 <li><strong>显式</strong>的完整性约束，如主键和外键。</li>
-<li><strong>隐式</strong>的完整性约束。<ul>
+<li><strong>隐式</strong>的完整性约束。
+<ul>
 <li>例如：所有账户余额总和减去所有贷款金额总和必须等于手头现金价值。</li>
 </ul>
 </li>
 </ul>
 </li>
-<li>在事务执行<strong>过程中</strong>，数据库可能暂时处于不一致状态。<ul>
+<li>在事务执行<strong>过程中</strong>，数据库可能暂时处于不一致状态。
+<ul>
 <li>例如：在上述转账示例的第3步之后、第6步之前，<code>A+B=2950</code>。</li>
 </ul>
 </li>
 <li>当事务<strong>成功完成</strong>时，数据库必须是一致的。</li>
 </ul>
-<hr>
-<h3 id="2-原子性"><a href="#2-原子性" class="headerlink" title="2. 原子性"></a>2. 原子性</h3><ul>
-<li>事务中的所有操作要么<strong>全部反映&#x2F;持久化</strong>到数据库，要么<strong>一个都不反映</strong>。<ul>
+<hr />
+<h3 id="2-原子性"><a class="markdownIt-Anchor" href="#2-原子性"></a> 2. 原子性</h3>
+<ul>
+<li>事务中的所有操作要么<strong>全部反映/持久化</strong>到数据库，要么<strong>一个都不反映</strong>。
+<ul>
 <li>事务中所有操作或者全部成功完成，并且这些操作结果被写入数据库；</li>
 <li>或者事务中的所有操作一个都不做，该事务对数据库和其他事务没有任何影响。</li>
 </ul>
 </li>
 <li>确保<strong>部分</strong>执行的事务的更新不会被反映到数据库中。</li>
 </ul>
-<hr>
-<h3 id="3-隔离性"><a href="#3-隔离性" class="headerlink" title="3. 隔离性"></a>3. 隔离性</h3><ul>
+<hr />
+<h3 id="3-隔离性"><a class="markdownIt-Anchor" href="#3-隔离性"></a> 3. 隔离性</h3>
+<ul>
 <li><strong>定义</strong>：即使多个事务并发执行，所有事务看起来都像是在串行执行，从而保持了一致性。</li>
 <li>每个事务都<strong>不知道</strong>其他事务正在并发执行。</li>
 <li>对于并发执行的事务，一个事务的执行不能被其他事务干扰。即，一个事务内部的操作和数据对其他事务是隔离的，并发执行的事务之间不能相互干扰。从执行结果来看，相当于事务串行执行。</li>
 <li><strong>隔离性</strong>保证了多个事务并发执行的<strong>正确性</strong>。</li>
 <li>并发控制机制确保了隔离性。</li>
 </ul>
-<p><strong>示例</strong>：如果在转账事务T1的第3步和第6步之间，允许另一个事务T2访问部分更新的数据库，T2将看到一个不一致的数据库（A&#x3D;950，B&#x3D;2000，总和为2950）。</p>
+<p><strong>示例</strong>：如果在转账事务T1的第3步和第6步之间，允许另一个事务T2访问部分更新的数据库，T2将看到一个不一致的数据库（A=950，B=2000，总和为2950）。</p>
 <ul>
 <li>通过<strong>串行</strong>地运行事务（一个接一个）可以确保隔离性。</li>
 </ul>
-<hr>
-<h3 id="4-持久性"><a href="#4-持久性" class="headerlink" title="4. 持久性"></a>4. 持久性</h3><ul>
+<hr />
+<h3 id="4-持久性"><a class="markdownIt-Anchor" href="#4-持久性"></a> 4. 持久性</h3>
+<ul>
 <li><strong>定义</strong>：一旦事务完成，该事务对数据库的更新必须<strong>持久保持</strong>，即使发生软件或硬件故障。</li>
-<li>缓冲区中数据项的修改值应该<strong>反映&#x2F;写入</strong>到磁盘上的数据库文件中。</li>
+<li>缓冲区中数据项的修改值应该<strong>反映/写入</strong>到磁盘上的数据库文件中。</li>
 <li>事务一旦提交（成功完成），对数据库数据的改变是<strong>永久性</strong>的——即持久化。</li>
 <li><strong>示例</strong>：$50的转账已经发生，即使发生软件或硬件故障，该事务对数据库的更新也必须持久保持。</li>
 </ul>
 <p><strong>示例2</strong>：对于图17.0中的T₃。</p>
 <ul>
-<li>事务开始时，局部缓冲区和磁盘缓冲区中A&#x3D;1000，B&#x3D;2000。</li>
-<li>执行<code>update(A)</code>后，局部缓冲区中a&#x3D;950。</li>
-<li>执行<code>update(B)</code>后，局部缓冲区中b&#x3D;2050。</li>
-<li>提交时，磁盘缓冲区中a&#x3D;950，b&#x3D;2050。</li>
-<li>最终，磁盘上的数据库文件中A&#x3D;950，B&#x3D;2050。</li>
+<li>事务开始时，局部缓冲区和磁盘缓冲区中A=1000，B=2000。</li>
+<li>执行<code>update(A)</code>后，局部缓冲区中a=950。</li>
+<li>执行<code>update(B)</code>后，局部缓冲区中b=2050。</li>
+<li>提交时，磁盘缓冲区中a=950，b=2050。</li>
+<li>最终，磁盘上的数据库文件中A=950，B=2050。</li>
 </ul>
-<hr>
-<h3 id="ACID特性的保障机制"><a href="#ACID特性的保障机制" class="headerlink" title="ACID特性的保障机制"></a>ACID特性的保障机制</h3><p>数据库系统中的ACID保障机制：</p>
+<hr />
+<h3 id="acid特性的保障机制"><a class="markdownIt-Anchor" href="#acid特性的保障机制"></a> ACID特性的保障机制</h3>
+<p>数据库系统中的ACID保障机制：</p>
 <ul>
-<li><strong>原子性</strong>：由事务管理&#x2F;恢复管理组件保障。</li>
+<li><strong>原子性</strong>：由事务管理/恢复管理组件保障。</li>
 <li><strong>一致性</strong>：由完整性约束和DBMS中的测试机制保障。</li>
 <li><strong>隔离性</strong>：由并发控制组件保障。</li>
 <li><strong>持久性</strong>：由恢复管理组件保障。</li>
 </ul>
-<hr>
-<h2 id="17-4-事务原子性与持久性（状态模型）"><a href="#17-4-事务原子性与持久性（状态模型）" class="headerlink" title="17.4 事务原子性与持久性（状态模型）"></a>17.4 事务原子性与持久性（状态模型）</h2><h3 id="关键定义"><a href="#关键定义" class="headerlink" title="关键定义"></a>关键定义</h3><ul>
+<hr />
+<h2 id="174-事务原子性与持久性状态模型"><a class="markdownIt-Anchor" href="#174-事务原子性与持久性状态模型"></a> 17.4 事务原子性与持久性（状态模型）</h2>
+<h3 id="关键定义"><a class="markdownIt-Anchor" href="#关键定义"></a> 关键定义</h3>
+<ul>
 <li><strong>定义1</strong>：如果一个事务可能无法成功完成其执行，则称其为<strong>中止</strong>。</li>
 <li><strong>定义2</strong>：如果一个事务成功完成其执行，则称其为<strong>提交</strong>。</li>
 <li><strong>定义3</strong>：一旦一个<strong>已中止</strong>事务所做的更改被<strong>撤销</strong>，则该事务被称为<strong>回滚</strong>。</li>
 <li><strong>定义4</strong>：如果一个事务已提交或已中止，则称其已<strong>终止</strong>。</li>
 </ul>
-<hr>
-<h3 id="事务状态（生命周期）"><a href="#事务状态（生命周期）" class="headerlink" title="事务状态（生命周期）"></a>事务状态（生命周期）</h3><ul>
+<hr />
+<h3 id="事务状态生命周期"><a class="markdownIt-Anchor" href="#事务状态生命周期"></a> 事务状态（生命周期）</h3>
+<ul>
 <li><strong>活动</strong> - 初始状态。</li>
 <li><strong>部分提交</strong> - 在最终语句（通常是<code>COMMIT</code>）被执行之后。</li>
 <li><strong>失败</strong> - 正常执行无法再继续进行。</li>
-<li><strong>中止</strong> - 在事务已回滚且数据库恢复到事务开始前的状态之后。<ul>
-<li>中止后的两个选项：<ul>
+<li><strong>中止</strong> - 在事务已回滚且数据库恢复到事务开始前的状态之后。
+<ul>
+<li>中止后的两个选项：
+<ul>
 <li><strong>重启</strong>事务：仅当没有内部逻辑错误时。</li>
 <li><strong>终止</strong>事务。</li>
 </ul>
@@ -520,9 +560,9 @@ if (true) {
 </li>
 <li><strong>提交</strong> - 在成功完成之后。</li>
 </ul>
-<hr>
-<h3 id="事务状态图-图17-1"><a href="#事务状态图-图17-1" class="headerlink" title="事务状态图 (图17.1)"></a>事务状态图 (图17.1)</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">     begin-transaction</span><br><span class="line">         |</span><br><span class="line">         v</span><br><span class="line">       active</span><br><span class="line">         |\</span><br><span class="line">         | \</span><br><span class="line">         |  \ (失败)</span><br><span class="line">         |   \</span><br><span class="line">         |    v</span><br><span class="line">         |   failed</span><br><span class="line">         |    |</span><br><span class="line">         |    v</span><br><span class="line">         |  aborted</span><br><span class="line">         |</span><br><span class="line">         v</span><br><span class="line">partially committed</span><br><span class="line">         |</span><br><span class="line">         v</span><br><span class="line">      committed</span><br></pre></td></tr></table></figure>
-
+<hr />
+<h3 id="事务状态图-图171"><a class="markdownIt-Anchor" href="#事务状态图-图171"></a> 事务状态图 (图17.1)</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">     begin-transaction</span><br><span class="line">         |</span><br><span class="line">         v</span><br><span class="line">       active</span><br><span class="line">         |\</span><br><span class="line">         | \</span><br><span class="line">         |  \ (失败)</span><br><span class="line">         |   \</span><br><span class="line">         |    v</span><br><span class="line">         |   failed</span><br><span class="line">         |    |</span><br><span class="line">         |    v</span><br><span class="line">         |  aborted</span><br><span class="line">         |</span><br><span class="line">         v</span><br><span class="line">partially committed</span><br><span class="line">         |</span><br><span class="line">         v</span><br><span class="line">      committed</span><br></pre></td></tr></table></figure>
 <ul>
 <li><code>active</code> -&gt; <code>partially committed</code>: 最终操作执行。</li>
 <li><code>partially committed</code> -&gt; <code>committed</code>: 提交。</li>
@@ -530,8 +570,9 @@ if (true) {
 <li><code>failed</code> -&gt; <code>aborted</code>: 回滚完成。</li>
 <li><code>aborted</code> -&gt; <code>active</code>: 重启（可选）。</li>
 </ul>
-<hr>
-<h3 id="成功提交的事务流程"><a href="#成功提交的事务流程" class="headerlink" title="成功提交的事务流程"></a>成功提交的事务流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">begin-trans. -&gt; op_i; ... op_n; -&gt; commit.</span><br></pre></td></tr></table></figure>
+<hr />
+<h3 id="成功提交的事务流程"><a class="markdownIt-Anchor" href="#成功提交的事务流程"></a> 成功提交的事务流程</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">begin-trans. -&gt; op_i; ... op_n; -&gt; commit.</span><br></pre></td></tr></table></figure>
 <p>DBMS操作：</p>
 <ol>
 <li>分配资源（如局部缓冲区），创建并启动事务。</li>
@@ -540,8 +581,9 @@ if (true) {
 <li>释放资源；结束事务。</li>
 </ol>
 <p>状态流：<code>活动</code> -&gt; <code>部分提交</code> -&gt; <code>已提交</code></p>
-<hr>
-<h3 id="回滚的事务流程"><a href="#回滚的事务流程" class="headerlink" title="回滚的事务流程"></a>回滚的事务流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">begin-trans. -&gt; op_i; ... op_n; -&gt; (故障/回滚)</span><br></pre></td></tr></table></figure>
+<hr />
+<h3 id="回滚的事务流程"><a class="markdownIt-Anchor" href="#回滚的事务流程"></a> 回滚的事务流程</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">begin-trans. -&gt; op_i; ... op_n; -&gt; (故障/回滚)</span><br></pre></td></tr></table></figure>
 <p>DBMS操作：</p>
 <ol>
 <li>分配资源（如局部缓冲区），创建并启动事务。</li>
@@ -551,317 +593,347 @@ if (true) {
 <li>释放资源；结束事务。</li>
 </ol>
 <p>状态流：<code>活动</code> -&gt; <code>失败</code> -&gt; <code>中止</code></p>
-<hr>
-<h3 id="事务状态详述"><a href="#事务状态详述" class="headerlink" title="事务状态详述"></a>事务状态详述</h3><ul>
-<li><p><strong>活动</strong>：</p>
+<hr />
+<h3 id="事务状态详述"><a class="markdownIt-Anchor" href="#事务状态详述"></a> 事务状态详述</h3>
+<ul>
+<li>
+<p><strong>活动</strong>：</p>
 <ul>
 <li>初始状态，事务从<code>begin-transaction</code>开始执行时处于此状态。</li>
 <li>事务被创建（在<code>begin-transaction</code>提交后），例如，为事务分配了局部缓冲区。</li>
 <li><strong>注意</strong>：事务操作被执行，但操作对数据库发出的修改<strong>可能</strong>只<strong>临时</strong>存储在磁盘缓冲区中，<strong>并未立即反映</strong>到磁盘上的数据库文件。</li>
 </ul>
 </li>
-<li><p><strong>部分提交</strong>：</p>
+<li>
+<p><strong>部分提交</strong>：</p>
 <ul>
 <li>在最终语句（<code>COMMIT</code>）提交后，事务进入此状态。</li>
 <li>事务操作产生的影响从磁盘缓冲区<strong>反映</strong>到数据库文件（持久化）。</li>
 </ul>
 </li>
-<li><p><strong>已提交</strong>：</p>
+<li>
+<p><strong>已提交</strong>：</p>
 <ul>
 <li>在所有操作成功完成后，事务进入此状态。所有结果已在<strong>部分提交</strong>状态反映到数据库文件。</li>
 <li>事务释放所占用的资源，终止（退出数据库系统），其生命周期结束。</li>
 </ul>
 </li>
-<li><p><strong>失败</strong>：</p>
+<li>
+<p><strong>失败</strong>：</p>
 <ul>
 <li>如果发现正常执行无法继续进行，事务进入此状态。</li>
 <li>事务被<strong>回滚</strong>以将数据库恢复到事务开始前的状态。在此状态下进行失败处理工作。</li>
 </ul>
 </li>
-<li><p><strong>中止</strong>：</p>
+<li>
+<p><strong>中止</strong>：</p>
 <ul>
 <li>在失败状态下事务被回滚后，数据库已恢复到事务开始前的状态，事务进入此状态以结束。</li>
 <li>事务释放所占用的资源，向其用户报告事务已中止，终止（退出数据库系统），其生命周期结束。表示DBMS已完成失败处理工作，事务将要退出系统。</li>
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="示例：事务中的回滚"><a href="#示例：事务中的回滚" class="headerlink" title="示例：事务中的回滚"></a>示例：事务中的回滚</h3><ul>
-<li><strong>定义：回滚</strong><ul>
+<hr />
+<h3 id="示例事务中的回滚"><a class="markdownIt-Anchor" href="#示例事务中的回滚"></a> 示例：事务中的回滚</h3>
+<ul>
+<li><strong>定义：回滚</strong>
+<ul>
 <li>撤销到目前为止事务已经对数据库所做的所有修改，数据库状态恢复到事务开始前的状态。</li>
 </ul>
 </li>
 </ul>
-<p><strong>示例</strong>：<br>定义表 <code>SC</code>：</p>
+<p><strong>示例</strong>：<br />
+定义表 <code>SC</code>：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE TABLE</span> SC (</span><br><span class="line">    s# <span class="type">INTEGER</span>,</span><br><span class="line">    c# <span class="type">INTEGER</span>,</span><br><span class="line">    grade <span class="type">INTEGER</span>,</span><br><span class="line">    <span class="keyword">CHECK</span> (grade <span class="keyword">BETWEEN</span> <span class="number">0</span> <span class="keyword">AND</span> <span class="number">100</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
 <p>定义更新事务 <code>update-tran</code>：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> SC</span><br><span class="line"><span class="keyword">SET</span> grade <span class="operator">=</span> grade <span class="operator">+</span> <span class="number">5</span></span><br><span class="line"><span class="keyword">WHERE</span> ...;</span><br></pre></td></tr></table></figure>
-
 <p><strong>回滚过程</strong>：</p>
 <ol>
 <li><strong>(a) 初始SC实例</strong>：例如，<code>(210, 5, 100)</code>。</li>
 <li><strong>(b) 发生故障时的SC实例</strong>：执行更新后，<code>grade</code>变为105，违反完整性约束（<code>grade &gt; 100</code>）。</li>
-<li><strong>(c) 回滚后的SC实例</strong>：撤销所有更新，恢复到初始状态，即<code>(210, 5, 100)</code>。</li>
+<li><strong>© 回滚后的SC实例</strong>：撤销所有更新，恢复到初始状态，即<code>(210, 5, 100)</code>。</li>
 </ol>
-<hr>
-<h2 id="17-5-事务隔离"><a href="#17-5-事务隔离" class="headerlink" title="17.5 事务隔离"></a>17.5 事务隔离</h2><h3 id="并发事务的调度"><a href="#并发事务的调度" class="headerlink" title="并发事务的调度"></a>并发事务的调度</h3><ul>
-<li>事务的<strong>并发执行</strong>允许：<ul>
+<hr />
+<h2 id="175-事务隔离"><a class="markdownIt-Anchor" href="#175-事务隔离"></a> 17.5 事务隔离</h2>
+<h3 id="并发事务的调度"><a class="markdownIt-Anchor" href="#并发事务的调度"></a> 并发事务的调度</h3>
+<ul>
+<li>事务的<strong>并发执行</strong>允许：
+<ul>
 <li>高吞吐量和资源利用率，减少等待时间。</li>
 <li>例如：多用户订票系统。</li>
 </ul>
 </li>
-<li>允许事务并发的<strong>缺点</strong>：<ul>
+<li>允许事务并发的<strong>缺点</strong>：
+<ul>
 <li>事务包含对共享数据的操作，不同的调度可能导致不同的最终数据库状态。</li>
 </ul>
 </li>
 <li>需要<strong>并发控制方案和事务调度</strong>。</li>
 </ul>
-<hr>
-<h3 id="并发执行与调度"><a href="#并发执行与调度" class="headerlink" title="并发执行与调度"></a>并发执行与调度</h3><ul>
-<li><strong>定义</strong>：对一组并发事务的<strong>调度</strong>，规定了并发事务操作的执行顺序。<ul>
+<hr />
+<h3 id="并发执行与调度"><a class="markdownIt-Anchor" href="#并发执行与调度"></a> 并发执行与调度</h3>
+<ul>
+<li><strong>定义</strong>：对一组并发事务的<strong>调度</strong>，规定了并发事务操作的执行顺序。
+<ul>
 <li>包含事务的所有操作。</li>
 <li>保持每个独立事务内部操作的顺序。</li>
 </ul>
 </li>
-<li><strong>注意</strong>：<ul>
+<li><strong>注意</strong>：
+<ul>
 <li>成功执行的事务将以<code>COMMIT</code>指令作为最后一条语句。</li>
 <li>执行失败的事务将以<code>ABORT</code>指令作为最后一条语句。</li>
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="示例：并发调度分析"><a href="#示例：并发调度分析" class="headerlink" title="示例：并发调度分析"></a>示例：并发调度分析</h3><ul>
-<li><strong>事务</strong>:<ul>
+<hr />
+<h3 id="示例并发调度分析"><a class="markdownIt-Anchor" href="#示例并发调度分析"></a> 示例：并发调度分析</h3>
+<ul>
+<li><strong>事务</strong>:
+<ul>
 <li>T₁: 从A转账$50到B。</li>
 <li>T₂: 从A转账余额的10%到B。</li>
 </ul>
 </li>
-<li><strong>初始值</strong>: A &#x3D; $1000, B &#x3D; $2000, (A + B) &#x3D; $3000。</li>
+<li><strong>初始值</strong>: A = $1000, B = $2000, (A + B) = $3000。</li>
 </ul>
-<h4 id="串行调度-S1-T₁-T₂"><a href="#串行调度-S1-T₁-T₂" class="headerlink" title="串行调度 S1 (T₁; T₂)"></a>串行调度 S1 (T₁; T₂)</h4><table>
+<h4 id="串行调度-s1-t1-t2"><a class="markdownIt-Anchor" href="#串行调度-s1-t1-t2"></a> 串行调度 S1 (T₁; T₂)</h4>
+<table>
 <thead>
 <tr>
-<th align="left">T₁</th>
-<th align="left">T₂</th>
+<th style="text-align:left">T₁</th>
+<th style="text-align:left">T₂</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"><code>read(A)</code></td>
-<td align="left"></td>
+<tbody>
+<tr>
+<td style="text-align:left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>A := A - 50</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>A := A - 50</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>write(A)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>read(B)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>B := B + 50</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>B := B + 50</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>write(B)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(B)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>commit</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>commit</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(A)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>temp := A * 0.1</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>temp := A * 0.1</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>A := A - temp</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>A := A - temp</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>B := B + temp</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>B := B + temp</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(B)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>commit</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>commit</code></td>
 </tr>
-</tbody></table>
-<p><strong>最终结果</strong>：A &#x3D; $855, B &#x3D; $2145, (A + B) &#x3D; $3000。</p>
-<hr>
-<h4 id="串行调度-S2-T₂-T₁"><a href="#串行调度-S2-T₂-T₁" class="headerlink" title="串行调度 S2 (T₂; T₁)"></a>串行调度 S2 (T₂; T₁)</h4><table>
+</tbody>
+</table>
+<p><strong>最终结果</strong>：A = $855, B = $2145, (A + B) = $3000。</p>
+<hr />
+<h4 id="串行调度-s2-t2-t1"><a class="markdownIt-Anchor" href="#串行调度-s2-t2-t1"></a> 串行调度 S2 (T₂; T₁)</h4>
+<table>
 <thead>
 <tr>
-<th align="left">T₁</th>
-<th align="left">T₂</th>
+<th style="text-align:left">T₁</th>
+<th style="text-align:left">T₂</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"></td>
-<td align="left"><code>read(A)</code></td>
+<tbody>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(A)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>temp := A * 0.1</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>temp := A * 0.1</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>A := A - temp</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>A := A - temp</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>B := B + temp</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>B := B + temp</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(B)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>commit</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>commit</code></td>
 </tr>
 <tr>
-<td align="left"><code>read(A)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>A := A - 50</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>A := A - 50</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>write(A)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>read(B)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>B := B + 50</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>B := B + 50</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>write(B)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(B)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>commit</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>commit</code></td>
+<td style="text-align:left"></td>
 </tr>
-</tbody></table>
-<p><strong>最终结果</strong>：A &#x3D; $850, B &#x3D; $2150, (A + B) &#x3D; $3000。</p>
+</tbody>
+</table>
+<p><strong>最终结果</strong>：A = $850, B = $2150, (A + B) = $3000。</p>
 <p><strong>结论</strong>：调度S1和S2导致共享数据项A和B的<strong>最终值不同</strong>，但都是<strong>正确</strong>的调度，因为都保持了总和不变。</p>
-<hr>
-<h4 id="并发调度-S3"><a href="#并发调度-S3" class="headerlink" title="并发调度 S3"></a>并发调度 S3</h4><ul>
-<li>将对A的两次写操作、对B的两次写操作安排在相近时间执行，利于在<code>COMMIT</code>时刻通过一次I&#x2F;O操作一次性将A&#x2F;B的修改结果写回数据库文件，减少写操作次数。</li>
+<hr />
+<h4 id="并发调度-s3"><a class="markdownIt-Anchor" href="#并发调度-s3"></a> 并发调度 S3</h4>
+<ul>
+<li>将对A的两次写操作、对B的两次写操作安排在相近时间执行，利于在<code>COMMIT</code>时刻通过一次I/O操作一次性将A/B的修改结果写回数据库文件，减少写操作次数。</li>
 <li>将对A的两次读操作、对B的两次读操作安排在相近时间执行，有利于减少读操作次数（第二次可从磁盘缓冲区读取）。</li>
 </ul>
-<p><strong>最终结果</strong>：A &#x3D; $855, B &#x3D; $2145, (A + B) &#x3D; $3000。（与S1结果相同）</p>
-<hr>
-<h4 id="并发调度-S4"><a href="#并发调度-S4" class="headerlink" title="并发调度 S4"></a>并发调度 S4</h4><ul>
+<p><strong>最终结果</strong>：A = $855, B = $2145, (A + B) = $3000。（与S1结果相同）</p>
+<hr />
+<h4 id="并发调度-s4"><a class="markdownIt-Anchor" href="#并发调度-s4"></a> 并发调度 S4</h4>
+<ul>
 <li>假设<code>read</code>直接从磁盘上的数据库文件读取数据。</li>
 </ul>
 <table>
 <thead>
 <tr>
-<th align="left">T₁</th>
-<th align="left">T₂</th>
+<th style="text-align:left">T₁</th>
+<th style="text-align:left">T₂</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"><code>read(A)</code></td>
-<td align="left"></td>
+<tbody>
+<tr>
+<td style="text-align:left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>A := A - 50</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>A := A - 50</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(A)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>temp := A * 0.1</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>temp := A * 0.1</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>A := A - temp</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>A := A - temp</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
 </tr>
 <tr>
-<td align="left"><code>write(A)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>read(B)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>B := B + 50</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>B := B + 50</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>commit</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>commit</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>B := B + temp</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>B := B + temp</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(B)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>commit</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>commit</code></td>
 </tr>
-</tbody></table>
-<p><strong>最终结果</strong>：A &#x3D; $950, B &#x3D; $2100, (A + B) &#x3D; $3050 <strong>（错误！）</strong></p>
-<hr>
-<h3 id="为什么S3正确而S4错误？"><a href="#为什么S3正确而S4错误？" class="headerlink" title="为什么S3正确而S4错误？"></a>为什么S3正确而S4错误？</h3><ul>
-<li><strong>S3（等价于S1）</strong>：<ul>
+</tbody>
+</table>
+<p><strong>最终结果</strong>：A = $950, B = $2100, (A + B) = $3050 <strong>（错误！）</strong></p>
+<hr />
+<h3 id="为什么s3正确而s4错误"><a class="markdownIt-Anchor" href="#为什么s3正确而s4错误"></a> 为什么S3正确而S4错误？</h3>
+<ul>
+<li><strong>S3（等价于S1）</strong>：
+<ul>
 <li>T1和T2对共享数据A和B的访问实质上是串行的。</li>
 <li>S3与串行调度S1的执行结果相同。</li>
 <li>S3<strong>等价于</strong>串行调度S1。</li>
 </ul>
 </li>
-<li><strong>S4（不等价于S1）</strong>：<ul>
+<li><strong>S4（不等价于S1）</strong>：
+<ul>
 <li>T1和T2以<strong>交错</strong>的方式操作共享数据A和B。</li>
 <li>S4与串行调度S1的执行结果不同。</li>
 <li>S4<strong>不等价于</strong>任何串行调度。</li>
@@ -870,135 +942,157 @@ if (true) {
 </ul>
 </li>
 </ul>
-<hr>
-<h2 id="17-6-可串行化"><a href="#17-6-可串行化" class="headerlink" title="17.6 可串行化"></a>17.6 可串行化</h2><ul>
-<li><ol>
+<hr />
+<h2 id="176-可串行化"><a class="markdownIt-Anchor" href="#176-可串行化"></a> 17.6 可串行化</h2>
+<ul>
+<li>
+<ol>
 <li>多个事务串行执行可以保证事务的ACID特性（如S1，S2），但执行效率低。</li>
 </ol>
 </li>
-<li><ol start="2">
+<li>
+<ol start="2">
 <li>多个事务并发执行时，如果事务操作调度顺序不当（如S4），会影响数据库系统的正确性。</li>
 </ol>
 </li>
-<li><strong>事务并发控制基本原理</strong>：事务调度<strong>可串行化</strong>。<ul>
+<li><strong>事务并发控制基本原理</strong>：事务调度<strong>可串行化</strong>。
+<ul>
 <li>相互冲突的操作串行执行。</li>
-<li>非冲突的操作并行&#x2F;交错执行。</li>
+<li>非冲突的操作并行/交错执行。</li>
 </ul>
 </li>
-<li><strong>动机：可串行化</strong><ul>
+<li><strong>动机：可串行化</strong>
+<ul>
 <li><strong>可串行化</strong>是判断并发调度是否正确的标准（如S3）。</li>
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="可串行化"><a href="#可串行化" class="headerlink" title="可串行化"></a>可串行化</h3><ul>
-<li><strong>目的</strong>：判断一个并发事务调度S是否正确。<ul>
+<hr />
+<h3 id="可串行化"><a class="markdownIt-Anchor" href="#可串行化"></a> 可串行化</h3>
+<ul>
+<li><strong>目的</strong>：判断一个并发事务调度S是否正确。
+<ul>
 <li>标准：S是否<strong>等价于</strong>某个串行调度S‘。</li>
 </ul>
 </li>
-<li><strong>基本假设</strong>：<ul>
+<li><strong>基本假设</strong>：
+<ul>
 <li>每个事务都保持数据库一致性。</li>
 <li>事务的串行执行保持数据库一致性。</li>
 </ul>
 </li>
 <li><strong>定义</strong>：如果一个调度S等价于某个串行调度S‘，则称S是<strong>可串行化</strong>的。</li>
-<li><strong>可串行化调度</strong>的类型：<ul>
-<li>冲突等价 &#x2F; 冲突可串行化。</li>
-<li>视图等价 &#x2F; 视图可串行化。</li>
+<li><strong>可串行化调度</strong>的类型：
+<ul>
+<li>冲突等价 / 冲突可串行化。</li>
+<li>视图等价 / 视图可串行化。</li>
 </ul>
 </li>
 <li>将对调度S正确性的判断转换为对S可串行性的判断。</li>
 </ul>
-<hr>
-<h3 id="冲突可串行化"><a href="#冲突可串行化" class="headerlink" title="冲突可串行化"></a>冲突可串行化</h3><ul>
+<hr />
+<h3 id="冲突可串行化"><a class="markdownIt-Anchor" href="#冲突可串行化"></a> 冲突可串行化</h3>
+<ul>
 <li>考虑两个事务 Tᵢ 和 Tⱼ，以及它们的调度 S。</li>
-<li><strong>定义</strong>：事务Tᵢ的指令 Iᵢ 和事务Tⱼ的指令 Iⱼ 是<strong>冲突</strong>的，当且仅当：<ul>
+<li><strong>定义</strong>：事务Tᵢ的指令 Iᵢ 和事务Tⱼ的指令 Iⱼ 是<strong>冲突</strong>的，当且仅当：
+<ul>
 <li>它们访问同一个数据项Q，并且</li>
 <li>至少有一个指令是<code>write(Q)</code>。</li>
-<li>即：<ul>
-<li>Iᵢ &#x3D; <code>read(Q)</code>, Iⱼ &#x3D; <code>write(Q)</code> <strong>（冲突）</strong></li>
-<li>Iᵢ &#x3D; <code>write(Q)</code>, Iⱼ &#x3D; <code>read(Q)</code> <strong>（冲突）</strong></li>
-<li>Iᵢ &#x3D; <code>write(Q)</code>, Iⱼ &#x3D; <code>write(Q)</code> <strong>（冲突）</strong></li>
-<li>Iᵢ &#x3D; <code>read(Q)</code>, Iⱼ &#x3D; <code>read(Q)</code> <strong>（不冲突）</strong></li>
+<li>即：
+<ul>
+<li>Iᵢ = <code>read(Q)</code>, Iⱼ = <code>write(Q)</code> <strong>（冲突）</strong></li>
+<li>Iᵢ = <code>write(Q)</code>, Iⱼ = <code>read(Q)</code> <strong>（冲突）</strong></li>
+<li>Iᵢ = <code>write(Q)</code>, Iⱼ = <code>write(Q)</code> <strong>（冲突）</strong></li>
+<li>Iᵢ = <code>read(Q)</code>, Iⱼ = <code>read(Q)</code> <strong>（不冲突）</strong></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-<hr>
-<h4 id="冲突等价"><a href="#冲突等价" class="headerlink" title="冲突等价"></a>冲突等价</h4><ul>
+<hr />
+<h4 id="冲突等价"><a class="markdownIt-Anchor" href="#冲突等价"></a> 冲突等价</h4>
+<ul>
 <li><strong>定义</strong>：如果调度S可以通过一系列<strong>交换非冲突指令</strong>的操作转换成调度S‘，则称S和S’是<strong>冲突等价</strong>的。</li>
 </ul>
 <p><strong>示例</strong>：</p>
 <table>
 <thead>
 <tr>
-<th align="left">S5</th>
-<th align="left">S6</th>
+<th style="text-align:left">S5</th>
+<th style="text-align:left">S6</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">T₁: <code>read(A)</code></td>
-<td align="left">T₁: <code>read(A)</code></td>
+<tbody>
+<tr>
+<td style="text-align:left">T₁: <code>read(A)</code></td>
+<td style="text-align:left">T₁: <code>read(A)</code></td>
 </tr>
 <tr>
-<td align="left">T₁: <code>write(A)</code></td>
-<td align="left">T₂: <code>read(A)</code></td>
+<td style="text-align:left">T₁: <code>write(A)</code></td>
+<td style="text-align:left">T₂: <code>read(A)</code></td>
 </tr>
 <tr>
-<td align="left">T₂: <code>read(A)</code></td>
-<td align="left">T₁: <code>write(A)</code></td>
+<td style="text-align:left">T₂: <code>read(A)</code></td>
+<td style="text-align:left">T₁: <code>write(A)</code></td>
 </tr>
 <tr>
-<td align="left">T₂: <code>write(B)</code></td>
-<td align="left">T₂: <code>write(B)</code></td>
+<td style="text-align:left">T₂: <code>write(B)</code></td>
+<td style="text-align:left">T₂: <code>write(B)</code></td>
 </tr>
 <tr>
-<td align="left">T₁: <code>read(B)</code></td>
-<td align="left">T₁: <code>read(B)</code></td>
+<td style="text-align:left">T₁: <code>read(B)</code></td>
+<td style="text-align:left">T₁: <code>read(B)</code></td>
 </tr>
 <tr>
-<td align="left">T₁: <code>write(B)</code></td>
-<td align="left">T₁: <code>write(B)</code></td>
+<td style="text-align:left">T₁: <code>write(B)</code></td>
+<td style="text-align:left">T₁: <code>write(B)</code></td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>S5和S6是冲突等价的（交换了T₁的<code>write(A)</code>和T₂的<code>read(A)</code>？不，它们是冲突的。实际上S5中T₁的<code>write(A)</code>和T₂的<code>read(A)</code>是冲突操作，不能交换。需要检查具体指令。此例意在说明概念）。</p>
-<hr>
-<h4 id="冲突可串行化-1"><a href="#冲突可串行化-1" class="headerlink" title="冲突可串行化"></a>冲突可串行化</h4><ul>
+<hr />
+<h4 id="冲突可串行化-2"><a class="markdownIt-Anchor" href="#冲突可串行化-2"></a> 冲突可串行化</h4>
+<ul>
 <li><strong>定义</strong>：如果一个并发调度S是<strong>冲突等价</strong>于某个串行调度S‘的，则称S是<strong>冲突可串行化</strong>的。</li>
-<li><strong>注意</strong>：<ul>
+<li><strong>注意</strong>：
+<ul>
 <li>只允许交换分属两个不同事务的操作。</li>
 <li>交换不能改变每个事务内部指令的顺序（例如，不允许交换T₁内部的<code>read(B)</code>和<code>write(B)</code>）。</li>
 <li>交换不能改变调度S中<strong>冲突指令</strong>的执行顺序（例如，不允许交换T₁的<code>write(A)</code>和T₂的<code>read(A)</code>，如果它们冲突）。</li>
 </ul>
 </li>
-<li>存在一些调度，它们不是冲突可串行化的。<ul>
-<li><strong>示例</strong>：<table>
+<li>存在一些调度，它们不是冲突可串行化的。
+<ul>
+<li><strong>示例</strong>：
+<table>
 <thead>
 <tr>
-<th align="left">T₃</th>
-<th align="left">T₄</th>
+<th style="text-align:left">T₃</th>
+<th style="text-align:left">T₄</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"><code>read(Q)</code></td>
-<td align="left"></td>
+<tbody>
+<tr>
+<td style="text-align:left"><code>read(Q)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(Q)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(Q)</code></td>
 </tr>
 <tr>
-<td align="left"><code>write(Q)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(Q)</code></td>
+<td style="text-align:left"></td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 </li>
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="冲突可串行化的判定方法"><a href="#冲突可串行化的判定方法" class="headerlink" title="冲突可串行化的判定方法"></a>冲突可串行化的判定方法</h3><p><strong>方法1</strong>：</p>
+<hr />
+<h3 id="冲突可串行化的判定方法"><a class="markdownIt-Anchor" href="#冲突可串行化的判定方法"></a> 冲突可串行化的判定方法</h3>
+<p><strong>方法1</strong>：</p>
 <ul>
 <li>从给定的并发调度S开始。</li>
 <li>保持S中<strong>冲突操作</strong>的执行顺序。</li>
@@ -1009,46 +1103,52 @@ if (true) {
 <ul>
 <li>使用<strong>前驱图</strong>。</li>
 </ul>
-<hr>
-<h3 id="示例1：判定冲突可串行化"><a href="#示例1：判定冲突可串行化" class="headerlink" title="示例1：判定冲突可串行化"></a>示例1：判定冲突可串行化</h3><ul>
-<li><strong>给定调度S</strong>（涉及T1, T2, T3, T4）：<table>
+<hr />
+<h3 id="示例1判定冲突可串行化"><a class="markdownIt-Anchor" href="#示例1判定冲突可串行化"></a> 示例1：判定冲突可串行化</h3>
+<ul>
+<li><strong>给定调度S</strong>（涉及T1, T2, T3, T4）：
+<table>
 <thead>
 <tr>
-<th align="left">时间</th>
-<th align="left">T1</th>
-<th align="left">T2</th>
-<th align="left">T3</th>
-<th align="left">T4</th>
+<th style="text-align:left">时间</th>
+<th style="text-align:left">T1</th>
+<th style="text-align:left">T2</th>
+<th style="text-align:left">T3</th>
+<th style="text-align:left">T4</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">1</td>
-<td align="left"></td>
-<td align="left"><code>write(X)</code></td>
-<td align="left"><code>read(X)</code></td>
-<td align="left"></td>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(X)</code></td>
+<td style="text-align:left"><code>read(X)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">2</td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"><code>write(Y)</code></td>
-<td align="left"><code>read(Y)</code></td>
+<td style="text-align:left">2</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(Y)</code></td>
+<td style="text-align:left"><code>read(Y)</code></td>
 </tr>
 <tr>
-<td align="left">3</td>
-<td align="left"><code>read(X)</code></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"><code>write(Z)</code></td>
+<td style="text-align:left">3</td>
+<td style="text-align:left"><code>read(X)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(Z)</code></td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 </li>
 <li><strong>答案</strong>：S等价于串行调度 <strong>&lt;T3; T2; T4; T1&gt;</strong>。（通过分析冲突边得出）</li>
 </ul>
-<hr>
-<h3 id="构建冲突可串行化调度"><a href="#构建冲突可串行化调度" class="headerlink" title="构建冲突可串行化调度"></a>构建冲突可串行化调度</h3><ul>
-<li>构建一个与可串行化调度S冲突等价的串行调度S‘：<ul>
+<hr />
+<h3 id="构建冲突可串行化调度"><a class="markdownIt-Anchor" href="#构建冲突可串行化调度"></a> 构建冲突可串行化调度</h3>
+<ul>
+<li>构建一个与可串行化调度S冲突等价的串行调度S‘：
+<ul>
 <li><strong>从</strong>给定的调度S开始。</li>
 <li><strong>保持</strong>S中冲突操作的执行顺序。</li>
 <li><strong>交换</strong>S中非冲突操作的执行顺序。</li>
@@ -1056,17 +1156,21 @@ if (true) {
 </ul>
 </li>
 </ul>
-<hr>
-<h2 id="17-7-事务隔离性与原子性（考虑故障的调度）"><a href="#17-7-事务隔离性与原子性（考虑故障的调度）" class="headerlink" title="17.7 事务隔离性与原子性（考虑故障的调度）"></a>17.7 事务隔离性与原子性（考虑故障的调度）</h2><ul>
-<li><p>两种需要考虑故障的调度特性：</p>
+<hr />
+<h2 id="177-事务隔离性与原子性考虑故障的调度"><a class="markdownIt-Anchor" href="#177-事务隔离性与原子性考虑故障的调度"></a> 17.7 事务隔离性与原子性（考虑故障的调度）</h2>
+<ul>
+<li>
+<p>两种需要考虑故障的调度特性：</p>
 <ul>
 <li>可恢复调度</li>
 <li>无级联回滚调度</li>
 </ul>
 </li>
-<li><p><strong>可恢复性</strong>（当事务失败时）：</p>
+<li>
+<p><strong>可恢复性</strong>（当事务失败时）：</p>
 <ul>
-<li><strong>要求</strong>：当事务 Tᵢ 失败时，已经执行的、依赖于 Tᵢ 的事务 Tⱼ 也应该被回滚&#x2F;撤销&#x2F;中止&#x2F;取消。<ul>
+<li><strong>要求</strong>：当事务 Tᵢ 失败时，已经执行的、依赖于 Tᵢ 的事务 Tⱼ 也应该被回滚/撤销/中止/取消。
+<ul>
 <li>Tⱼ <strong>读取</strong>了由 Tᵢ <strong>写入</strong>的数据。</li>
 </ul>
 </li>
@@ -1074,9 +1178,11 @@ if (true) {
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="可恢复调度"><a href="#可恢复调度" class="headerlink" title="可恢复调度"></a>可恢复调度</h3><ul>
-<li><strong>定义</strong>：一个调度是<strong>可恢复的</strong>，如果对于每一对事务 Tᵢ 和 Tⱼ，满足：<ul>
+<hr />
+<h3 id="可恢复调度"><a class="markdownIt-Anchor" href="#可恢复调度"></a> 可恢复调度</h3>
+<ul>
+<li><strong>定义</strong>：一个调度是<strong>可恢复的</strong>，如果对于每一对事务 Tᵢ 和 Tⱼ，满足：
+<ul>
 <li>如果 Tⱼ 读取了之前由 Tᵢ 写入的数据项Q，那么 Tᵢ 的<code>COMMIT</code>操作必须在 Tⱼ 的<code>COMMIT</code>操作<strong>之前</strong>出现。</li>
 </ul>
 </li>
@@ -1084,166 +1190,185 @@ if (true) {
 <table>
 <thead>
 <tr>
-<th align="left">Tᵢ</th>
-<th align="left">Tⱼ</th>
+<th style="text-align:left">Tᵢ</th>
+<th style="text-align:left">Tⱼ</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"><code>write(Q)</code></td>
-<td align="left"></td>
+<tbody>
+<tr>
+<td style="text-align:left"><code>write(Q)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">（故障&#x2F;回滚点）</td>
-<td align="left"></td>
+<td style="text-align:left">（故障/回滚点）</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(Q)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(Q)</code></td>
 </tr>
 <tr>
-<td align="left"><code>commit</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>commit</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>commit</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>commit</code></td>
 </tr>
-</tbody></table>
-<p><strong>Tⱼ 依赖于 Tᵢ</strong>：当Tᵢ需要中止&#x2F;回滚时，由于Tᵢ尚未提交，Tⱼ也尚未提交，因此Tⱼ可以回滚，Tⱼ中的<code>read(Q)</code>操作也随之被撤销。</p>
-<hr>
-<h3 id="示例1：不可恢复调度（违反完整性约束）"><a href="#示例1：不可恢复调度（违反完整性约束）" class="headerlink" title="示例1：不可恢复调度（违反完整性约束）"></a>示例1：不可恢复调度（违反完整性约束）</h3><ul>
+</tbody>
+</table>
+<p><strong>Tⱼ 依赖于 Tᵢ</strong>：当Tᵢ需要中止/回滚时，由于Tᵢ尚未提交，Tⱼ也尚未提交，因此Tⱼ可以回滚，Tⱼ中的<code>read(Q)</code>操作也随之被撤销。</p>
+<hr />
+<h3 id="示例1不可恢复调度违反完整性约束"><a class="markdownIt-Anchor" href="#示例1不可恢复调度违反完整性约束"></a> 示例1：不可恢复调度（违反完整性约束）</h3>
+<ul>
 <li><strong>表</strong>：<code>SC(s#, c#, grade)</code>，约束：<code>CHECK (0 &lt;= grade &lt;= 100)</code>。</li>
 <li><strong>表</strong>：<code>MaxGrade(c#, maxG)</code>。</li>
-<li><strong>事务</strong>：<ul>
+<li><strong>事务</strong>：
+<ul>
 <li>Tᵢ: 插入一条记录，然后更新所有成绩加5。</li>
 <li>Tⱼ: 从SC计算每门课最高分插入MaxGrade。</li>
 </ul>
 </li>
-<li><strong>问题</strong>：<ul>
+<li><strong>问题</strong>：
+<ul>
 <li>Tᵢ的更新操作可能违反约束（如grade&gt;100），导致Tᵢ回滚。</li>
-<li>但如果Tⱼ在Tᵢ回滚<strong>之前</strong>已经提交，它读取了Tᵢ更新后的中间数据（可能包括违反约束的105），并基于此计算了maxG&#x3D;105，这个错误结果被持久化。</li>
+<li>但如果Tⱼ在Tᵢ回滚<strong>之前</strong>已经提交，它读取了Tᵢ更新后的中间数据（可能包括违反约束的105），并基于此计算了maxG=105，这个错误结果被持久化。</li>
 <li>即使后来Tᵢ回滚，Tⱼ的错误结果也无法撤销，因为Tⱼ已提交。这违反了数据库一致性。</li>
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="SQL-Server中的回滚设置：SET-XACT-ABORT"><a href="#SQL-Server中的回滚设置：SET-XACT-ABORT" class="headerlink" title="SQL Server中的回滚设置：SET XACT_ABORT"></a>SQL Server中的回滚设置：<code>SET XACT_ABORT</code></h3><ul>
-<li><code>SET XACT_ABORT { ON | OFF }</code><ul>
+<hr />
+<h3 id="sql-server中的回滚设置set-xact_abort"><a class="markdownIt-Anchor" href="#sql-server中的回滚设置set-xact_abort"></a> SQL Server中的回滚设置：<code>SET XACT_ABORT</code></h3>
+<ul>
+<li><code>SET XACT_ABORT { ON | OFF }</code>
+<ul>
 <li>指定当Transact-SQL语句产生运行时错误时，是否自动回滚当前事务。</li>
 </ul>
 </li>
 <li><strong>为<code>ON</code>时</strong>：如果任何语句产生运行时错误，<strong>整个事务</strong>将终止并回滚。</li>
-<li><strong>为<code>OFF</code>时</strong>（<strong>默认</strong>）：只回滚产生错误的<strong>单个Transact-SQL语句</strong>，而事务将继续处理后续语句。<ul>
+<li><strong>为<code>OFF</code>时</strong>（<strong>默认</strong>）：只回滚产生错误的<strong>单个Transact-SQL语句</strong>，而事务将继续处理后续语句。
+<ul>
 <li>提高事务执行效率，但可能破坏事务原子性。</li>
 </ul>
 </li>
 </ul>
 <p><strong>示例</strong>：在<code>SET XACT_ABORT OFF</code>模式下，一个事务包含<code>INSERT</code>和可能违反约束的<code>UPDATE</code>。如果<code>UPDATE</code>失败回滚，<code>INSERT</code>可能仍然成功提交，不满足原子性。设置为<code>ON</code>可解决此问题。</p>
-<hr>
-<h3 id="示例2：不可恢复调度（简单读写）"><a href="#示例2：不可恢复调度（简单读写）" class="headerlink" title="示例2：不可恢复调度（简单读写）"></a>示例2：不可恢复调度（简单读写）</h3><table>
+<hr />
+<h3 id="示例2不可恢复调度简单读写"><a class="markdownIt-Anchor" href="#示例2不可恢复调度简单读写"></a> 示例2：不可恢复调度（简单读写）</h3>
+<table>
 <thead>
 <tr>
-<th align="left">T₈</th>
-<th align="left">T₉</th>
+<th style="text-align:left">T₈</th>
+<th style="text-align:left">T₉</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"><code>read(A)</code></td>
-<td align="left"></td>
+<tbody>
+<tr>
+<td style="text-align:left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>write(A)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(A)</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>commit</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>commit</code></td>
 </tr>
 <tr>
-<td align="left"><code>read(B)</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>commit</code></td>
-<td align="left"></td>
+<td style="text-align:left"><code>commit</code></td>
+<td style="text-align:left"></td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <ul>
 <li>S9是<strong>不可恢复</strong>的，如果T₉在<code>read(A)</code>之后立即提交。</li>
 <li>如果T₈在T₉提交<strong>之后</strong>才中止，数据项A的值将被回滚到T₈执行前的旧值。</li>
 <li><strong>但是</strong> T₉已经读取了A的<strong>新值</strong>并且已经提交了。T₉的提交无法撤销，导致数据不一致。</li>
 </ul>
-<hr>
-<h3 id="无级联回滚调度"><a href="#无级联回滚调度" class="headerlink" title="无级联回滚调度"></a>无级联回滚调度</h3><ul>
-<li><p><strong>定义：级联回滚</strong></p>
+<hr />
+<h3 id="无级联回滚调度"><a class="markdownIt-Anchor" href="#无级联回滚调度"></a> 无级联回滚调度</h3>
+<ul>
+<li>
+<p><strong>定义：级联回滚</strong></p>
 <ul>
 <li>单个事务的失败导致一系列事务回滚。</li>
 </ul>
 </li>
-<li><p><strong>示例 S10</strong>：</p>
+<li>
+<p><strong>示例 S10</strong>：</p>
 <table>
 <thead>
 <tr>
-<th align="left">T₁₀</th>
-<th align="left">T₁₁</th>
-<th align="left">T₁₂</th>
+<th style="text-align:left">T₁₀</th>
+<th style="text-align:left">T₁₁</th>
+<th style="text-align:left">T₁₂</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left"><code>read(A)</code></td>
-<td align="left"></td>
-<td align="left"></td>
+<tbody>
+<tr>
+<td style="text-align:left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>read(B)</code></td>
-<td align="left"></td>
-<td align="left"></td>
+<td style="text-align:left"><code>read(B)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"><code>write(A)</code></td>
-<td align="left"></td>
-<td align="left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>read(A)</code></td>
-<td align="left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"><code>write(A)</code></td>
-<td align="left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>write(A)</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"><code>read(A)</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"><code>read(A)</code></td>
 </tr>
 <tr>
-<td align="left"><code>abort</code></td>
-<td align="left"></td>
-<td align="left"></td>
+<td style="text-align:left"><code>abort</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">（导致回滚）</td>
-<td align="left">（级联回滚）</td>
-<td align="left">（级联回滚）</td>
+<td style="text-align:left">（导致回滚）</td>
+<td style="text-align:left">（级联回滚）</td>
+<td style="text-align:left">（级联回滚）</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <ul>
 <li>在T₁₀、T₁₁、T₁₂提交之前，T₁₂读取了A。当T₁₀因故障回滚时，T₁₁应该回滚，进而导致T₁₂回滚。</li>
 </ul>
 </li>
-<li><p>级联回滚是不希望的，因为它导致大量工作被撤销。</p>
+<li>
+<p>级联回滚是不希望的，因为它导致大量工作被撤销。</p>
 </li>
 </ul>
-<hr>
-<h3 id="无级联回滚调度-1"><a href="#无级联回滚调度-1" class="headerlink" title="无级联回滚调度"></a>无级联回滚调度</h3><ul>
-<li><strong>定义</strong>：<strong>无级联回滚调度</strong>是不会发生级联回滚的调度。<ul>
+<hr />
+<h3 id="无级联回滚调度-2"><a class="markdownIt-Anchor" href="#无级联回滚调度-2"></a> 无级联回滚调度</h3>
+<ul>
+<li><strong>定义</strong>：<strong>无级联回滚调度</strong>是不会发生级联回滚的调度。
+<ul>
 <li>对于任意一对事务Tᵢ和Tⱼ，如果Tⱼ读取了之前由Tᵢ写入的数据项Q，那么Tᵢ的<code>COMMIT</code>操作必须在Tⱼ的<code>READ</code>操作<strong>之前</strong>出现。</li>
 <li>Tⱼ<strong>只读取</strong>已提交事务Tᵢ所修改的、不会再发生变化的数据。</li>
 </ul>
@@ -1253,42 +1378,47 @@ if (true) {
 <table>
 <thead>
 <tr>
-<th align="left">无级联回滚调度示例</th>
-<th align="left">可恢复调度示例</th>
+<th style="text-align:left">无级联回滚调度示例</th>
+<th style="text-align:left">可恢复调度示例</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">Tᵢ: <code>write(Q)</code></td>
-<td align="left">Tᵢ: <code>write(Q)</code></td>
+<tbody>
+<tr>
+<td style="text-align:left">Tᵢ: <code>write(Q)</code></td>
+<td style="text-align:left">Tᵢ: <code>write(Q)</code></td>
 </tr>
 <tr>
-<td align="left">Tᵢ: <code>commit</code></td>
-<td align="left"></td>
+<td style="text-align:left">Tᵢ: <code>commit</code></td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td align="left">Tⱼ: <code>read(Q)</code></td>
-<td align="left">Tⱼ: <code>read(Q)</code></td>
+<td style="text-align:left">Tⱼ: <code>read(Q)</code></td>
+<td style="text-align:left">Tⱼ: <code>read(Q)</code></td>
 </tr>
 <tr>
-<td align="left">Tⱼ: <code>commit</code></td>
-<td align="left">Tᵢ: <code>commit</code></td>
+<td style="text-align:left">Tⱼ: <code>commit</code></td>
+<td style="text-align:left">Tᵢ: <code>commit</code></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td align="left">Tⱼ: <code>commit</code></td>
+<td style="text-align:left"></td>
+<td style="text-align:left">Tⱼ: <code>commit</code></td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <ul>
-<li><strong>关系</strong>：<ul>
+<li><strong>关系</strong>：
+<ul>
 <li>无级联回滚调度<strong>必定是</strong>可恢复调度。</li>
 <li>但可恢复调度<strong>不一定</strong>是无级联回滚调度。</li>
 </ul>
 </li>
 </ul>
-<hr>
-<h3 id="例题分析"><a href="#例题分析" class="headerlink" title="例题分析"></a>例题分析</h3><ul>
+<hr />
+<h3 id="例题分析"><a class="markdownIt-Anchor" href="#例题分析"></a> 例题分析</h3>
+<ul>
 <li><strong>考虑事务</strong> T₁, T₂, T₃, T₄ 在调度S下并发访问关系表 <code>Student</code> 和 <code>Grade</code>。</li>
-<li><strong>问题</strong>：<ol>
+<li><strong>问题</strong>：
+<ol>
 <li>为S构建前驱图。</li>
 <li>S是否是可串行化调度？如果不是，说明原因。</li>
 <li>S是否是可恢复调度？为什么？</li>
@@ -1307,23 +1437,28 @@ if (true) {
 <li><strong>(3) 可恢复性</strong>：<strong>不是</strong>。因为T₂读取了T₁修改但<strong>尚未提交</strong>的<code>stuName</code>，而T₂的<code>COMMIT</code>操作早于T₁的<code>COMMIT</code>。如果T₁后来回滚，T₂已提交的读取结果无法撤销。</li>
 <li><strong>(4) 无级联回滚</strong>：<strong>不是</strong>。因为它不是可恢复调度，且T₂读取了未提交的数据。</li>
 </ol>
-<hr>
-<h2 id="附录-17-1-SQL-Server-中的事务"><a href="#附录-17-1-SQL-Server-中的事务" class="headerlink" title="附录 17-1 SQL Server 中的事务"></a>附录 17-1 SQL Server 中的事务</h2><h3 id="三种事务执行模式"><a href="#三种事务执行模式" class="headerlink" title="三种事务执行模式"></a>三种事务执行模式</h3><ol>
-<li><p><strong>显式事务</strong></p>
+<hr />
+<h2 id="附录-17-1-sql-server-中的事务"><a class="markdownIt-Anchor" href="#附录-17-1-sql-server-中的事务"></a> 附录 17-1 SQL Server 中的事务</h2>
+<h3 id="三种事务执行模式"><a class="markdownIt-Anchor" href="#三种事务执行模式"></a> 三种事务执行模式</h3>
+<ol>
+<li>
+<p><strong>显式事务</strong></p>
 <ul>
 <li>由 <code>BEGIN TRANSACTION</code> 和 <code>COMMIT</code> 或 <code>ROLLBACK</code> 界定。</li>
-<li>由用户&#x2F;应用程序定义，<strong>由用户显式控制</strong>。</li>
+<li>由用户/应用程序定义，<strong>由用户显式控制</strong>。</li>
 <li>例如：账户转账事务。</li>
 </ul>
 </li>
-<li><p><strong>自动提交事务</strong>（<strong>SQL Server 默认模式</strong>）</p>
+<li>
+<p><strong>自动提交事务</strong>（<strong>SQL Server 默认模式</strong>）</p>
 <ul>
 <li>在此模式下，<strong>每条单独的</strong> Transact-SQL 语句本身就是一个事务。</li>
 <li>语句成功完成则提交，失败则回滚该语句。</li>
 <li>例如：<code>UPDATE SC SET Grade=Grade+10</code>，如果导致某成绩超过100而违反约束，则该<code>UPDATE</code>语句被回滚。</li>
 </ul>
 </li>
-<li><p><strong>隐性事务</strong></p>
+<li>
+<p><strong>隐性事务</strong></p>
 <ul>
 <li>通过 <code>SET IMPLICIT_TRANSACTIONS ON</code> 设置。</li>
 <li>在此模式下，事务无需用<code>BEGIN TRANSACTION</code>显式开始。当前事务以<code>COMMIT</code>或<code>ROLLBACK</code>结束时，系统自动开始下一个事务，形成连续的事务链。</li>
@@ -1331,18 +1466,22 @@ if (true) {
 </ul>
 </li>
 </ol>
-<hr>
-<h3 id="SQL-Server-批处理中的事务"><a href="#SQL-Server-批处理中的事务" class="headerlink" title="SQL Server 批处理中的事务"></a>SQL Server 批处理中的事务</h3><ul>
+<hr />
+<h3 id="sql-server-批处理中的事务"><a class="markdownIt-Anchor" href="#sql-server-批处理中的事务"></a> SQL Server 批处理中的事务</h3>
+<ul>
 <li><strong>批处理</strong>：包含一个或多个SQL语句的组，从客户端一次性发送到服务器执行。</li>
-<li><strong>事务与批的关系</strong>：多对多。<ul>
+<li><strong>事务与批的关系</strong>：多对多。
+<ul>
 <li>一个事务可包含多个批，一个批中也可有多个事务。</li>
 </ul>
 </li>
-<li><strong>默认行为（<code>SET XACT_ABORT OFF</code>）</strong>：<ul>
+<li><strong>默认行为（<code>SET XACT_ABORT OFF</code>）</strong>：
+<ul>
 <li>当批中的某些语句执行出错时，DBMS停止执行当前及后续语句，但<strong>出错前已成功执行的语句有效，不会被回滚</strong>。这可能破坏事务原子性。</li>
 </ul>
 </li>
-<li><strong>确保原子性</strong>：<ul>
+<li><strong>确保原子性</strong>：
+<ul>
 <li>在批提交前，使用 <code>SET XACT_ABORT ON</code>。</li>
 <li>这样，任何运行时错误都会导致<strong>整个事务</strong>回滚。</li>
 </ul>
@@ -1353,9 +1492,11 @@ if (true) {
 <li><code>SET XACT_ABORT OFF</code>：<code>INSERT</code> 成功，<code>UPDATE</code> 违反约束回滚，但<code>INSERT</code>结果保留 → 违反原子性。</li>
 <li><code>SET XACT_ABORT ON</code>：<code>UPDATE</code> 违反约束 → 整个事务（包括<code>INSERT</code>）回滚 → 保证原子性。</li>
 </ul>
-<hr>
-<h2 id="附录-17-2-保存点"><a href="#附录-17-2-保存点" class="headerlink" title="附录 17-2 保存点"></a>附录 17-2 保存点</h2><ul>
-<li><strong><code>SAVEPOINT</code></strong> 语句在事务执行过程中定义<strong>中间点&#x2F;状态</strong>。<ul>
+<hr />
+<h2 id="附录-17-2-保存点"><a class="markdownIt-Anchor" href="#附录-17-2-保存点"></a> 附录 17-2 保存点</h2>
+<ul>
+<li><strong><code>SAVEPOINT</code></strong> 语句在事务执行过程中定义<strong>中间点/状态</strong>。
+<ul>
 <li>使用保存点可以将相关语句分组，标识事务内的重要状态。</li>
 </ul>
 </li>
@@ -1370,37 +1511,47 @@ if (true) {
 <ul>
 <li>(a) 事务开始前。</li>
 <li>(b) <code>INSERT</code> 执行后。</li>
-<li>(c) <code>DELETE</code> 执行后（删除了“王菲”和“章立”）。</li>
+<li>© <code>DELETE</code> 执行后（删除了“王菲”和“章立”）。</li>
 <li>(d) <code>ROLLBACK</code> 到保存点后（恢复了被删除的“王菲”和“章立”）。</li>
 </ul>
-<hr>
-<h2 id="第17章-事务：大纲概要"><a href="#第17章-事务：大纲概要" class="headerlink" title="第17章 事务：大纲概要"></a>第17章 事务：大纲概要</h2><h3 id="I-事务概念与特性"><a href="#I-事务概念与特性" class="headerlink" title="I. 事务概念与特性"></a>I. 事务概念与特性</h3><ul>
-<li>17.1 事务概念<ul>
+<hr />
+<h2 id="第17章-事务大纲概要"><a class="markdownIt-Anchor" href="#第17章-事务大纲概要"></a> 第17章 事务：大纲概要</h2>
+<h3 id="i-事务概念与特性"><a class="markdownIt-Anchor" href="#i-事务概念与特性"></a> I. 事务概念与特性</h3>
+<ul>
+<li>17.1 事务概念
+<ul>
 <li>读写 vs. 输入输出</li>
 <li>ACID特性</li>
 </ul>
 </li>
 <li>17.2 简单事务模型</li>
 </ul>
-<h3 id="II-事务原子性与持久性"><a href="#II-事务原子性与持久性" class="headerlink" title="II. 事务原子性与持久性"></a>II. 事务原子性与持久性</h3><ul>
+<h3 id="ii-事务原子性与持久性"><a class="markdownIt-Anchor" href="#ii-事务原子性与持久性"></a> II. 事务原子性与持久性</h3>
+<ul>
 <li>17.4 事务状态模型与A、D特性保障</li>
 </ul>
-<h3 id="III-多事务并发执行"><a href="#III-多事务并发执行" class="headerlink" title="III. 多事务并发执行"></a>III. 多事务并发执行</h3><ul>
+<h3 id="iii-多事务并发执行"><a class="markdownIt-Anchor" href="#iii-多事务并发执行"></a> III. 多事务并发执行</h3>
+<ul>
 <li>17.5 事务隔离性</li>
 <li>17.6 可串行化（正确的并发调度，无故障时）</li>
 </ul>
-<h3 id="IV-正确的并发调度（考虑故障时）"><a href="#IV-正确的并发调度（考虑故障时）" class="headerlink" title="IV. 正确的并发调度（考虑故障时）"></a>IV. 正确的并发调度（考虑故障时）</h3><ul>
-<li>17.7 事务隔离性与原子性<ul>
+<h3 id="iv-正确的并发调度考虑故障时"><a class="markdownIt-Anchor" href="#iv-正确的并发调度考虑故障时"></a> IV. 正确的并发调度（考虑故障时）</h3>
+<ul>
+<li>17.7 事务隔离性与原子性
+<ul>
 <li>可恢复调度与无级联回滚调度</li>
 </ul>
 </li>
 </ul>
-<h3 id="V-事务在SQL中的实现"><a href="#V-事务在SQL中的实现" class="headerlink" title="V. 事务在SQL中的实现"></a>V. 事务在SQL中的实现</h3><ul>
-<li>17.8 事务隔离级别（一致性与并发性的权衡）<ul>
+<h3 id="v-事务在sql中的实现"><a class="markdownIt-Anchor" href="#v-事务在sql中的实现"></a> V. 事务在SQL中的实现</h3>
+<ul>
+<li>17.8 事务隔离级别（一致性与并发性的权衡）
+<ul>
 <li><code>SERIALIZABLE</code>, <code>REPEATABLE READ</code>, <code>READ COMMITTED</code>, <code>READ UNCOMMITTED</code></li>
 </ul>
 </li>
-<li>17.9 隔离级别的实现<ul>
+<li>17.9 隔离级别的实现
+<ul>
 <li>锁、时间戳、多版本与快照隔离</li>
 </ul>
 </li>
@@ -1417,7 +1568,7 @@ if (true) {
   input.setSelectionRange(0, 99999);
   document.execCommand("copy");
   document.body.removeChild(input);
-}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Yuejin's Blog</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>数据库<span class="categoryesPageCount">12</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Database/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Database<span class="tagsPageCount">12</span></a></div></div><div class="post_share"><div class="social-share" data-image="/img/C7_cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2025/12/28/DB_QueryOptim/"><img class="prev-cover" src="/img/C7_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">§16 Query Optimization 解读</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/12/24/DB_AdvancedSQL/" title="§5 Advanced-SQL课件详解"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§5 Advanced-SQL课件详解</div></div></a></div><div><a href="/2025/12/24/DB_Intermediate%20SQL/" title="§4 Intermediate-SQL 解读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§4 Intermediate-SQL 解读</div></div></a></div><div><a href="/2025/12/26/DB_E-R%20Model/" title="§6 E-R Model 解读"><img class="cover" src="/img/ER_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-26</div><div class="title">§6 E-R Model 解读</div></div></a></div><div><a href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-27</div><div class="title">§14 Indexing 解读</div></div></a></div><div><a href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-28</div><div class="title">§16 Query Optimization 解读</div></div></a></div><div><a href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-28</div><div class="title">§15 Query Processing 简读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src="/img/my_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"><div class="author-intro" style="line-height: 1.7; text-align: center; font-family: inherit; margin-top: -0.5rem; margin-bottom: 0.5rem;">
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Yuejin's Blog</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>数据库<span class="categoryesPageCount">12</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Database/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Database<span class="tagsPageCount">12</span></a></div></div><div class="post_share"><div class="social-share" data-image="/img/C7_cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2025/12/28/DB_QueryOptim/"><img class="prev-cover" src="/img/C7_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">§16 Query Optimization 解读</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/12/24/DB_AdvancedSQL/" title="§5 Advanced-SQL课件详解"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§5 Advanced-SQL课件详解</div></div></a></div><div><a href="/2025/12/26/DB_E-R%20Model/" title="§6 E-R Model 解读"><img class="cover" src="/img/ER_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-26</div><div class="title">§6 E-R Model 解读</div></div></a></div><div><a href="/2025/12/24/DB_Intermediate%20SQL/" title="§4 Intermediate-SQL 解读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§4 Intermediate-SQL 解读</div></div></a></div><div><a href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-27</div><div class="title">§14 Indexing 解读</div></div></a></div><div><a href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-28</div><div class="title">§15 Query Processing 简读</div></div></a></div><div><a href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-28</div><div class="title">§16 Query Optimization 解读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src="/img/my_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"><div class="author-intro" style="line-height: 1.7; text-align: center; font-family: inherit; margin-top: -0.5rem; margin-bottom: 0.5rem;">
   <p style="font-size: 1.15rem; margin-bottom: 0.8rem; font-weight: 500; color: var(--anzhiyu-fontcolor);">你好，我是 <span style="color: #00ffcc; font-weight: 600; text-shadow: 0 0 5px #00ffccaa;">Yuejin Wu</span>！👋</p>
   <p style="font-size: 1.05rem; margin-bottom: 0.6rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">BUPT 本科生 · 人工智能专业</p>
   <p style="font-size: 1.05rem; margin-bottom: 1rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">记录学习、思考与生活</p>
@@ -1425,7 +1576,7 @@ if (true) {
    保持好奇，持续探索
   </p>
 </div>
-</div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">Yuejin Wu</h1><div class="author-info__desc"></div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/YuejinWu/YuejinWu.github.io" target="_blank" title="Github"></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC17%E7%AB%A0%EF%BC%9A%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">第17章：事务管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC5%E9%83%A8%E5%88%86%EF%BC%9A%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">第5部分：事务管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">事务管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-1-%E4%BA%8B%E5%8A%A1%E6%A6%82%E5%BF%B5"><span class="toc-number">4.</span> <span class="toc-text">17.1 事务概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%891"><span class="toc-number">4.1.</span> <span class="toc-text">定义1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%892"><span class="toc-number">4.2.</span> <span class="toc-text">定义2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%EF%BC%9A%E7%94%B1%E8%AF%BB%E5%86%99%E5%85%83%E6%93%8D%E4%BD%9C%E5%AE%9A%E4%B9%89%E3%80%90%E9%80%BB%E8%BE%91%E8%AF%BB%E3%80%81%E9%80%BB%E8%BE%91%E5%86%99%E3%80%91"><span class="toc-number">4.3.</span> <span class="toc-text">事务：由读写元操作定义【逻辑读、逻辑写】</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8C%85%E5%90%AB%E5%9B%9E%E6%BB%9A%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-number">4.4.</span> <span class="toc-text">包含回滚的事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQL%E8%AF%AD%E5%8F%A5-vs-%E8%AF%BB%E5%86%99%E5%85%83%E6%93%8D%E4%BD%9C"><span class="toc-number">4.5.</span> <span class="toc-text">SQL语句 vs. 读写元操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQL-Server%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%A4%BA%E4%BE%8B"><span class="toc-number">4.6.</span> <span class="toc-text">SQL Server中的事务示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-2-%E4%BA%8B%E5%8A%A1%E6%A8%A1%E5%9E%8B"><span class="toc-number">5.</span> <span class="toc-text">17.2 事务模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E6%93%8D%E4%BD%9C%E5%AE%9A%E4%B9%89"><span class="toc-number">5.1.</span> <span class="toc-text">事务模型中的操作定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E8%AF%BB%E5%86%99%E6%93%8D%E4%BD%9C%E7%A4%BA%E6%84%8F%E5%9B%BE"><span class="toc-number">5.2.</span> <span class="toc-text">事务读写操作示意图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%BD%AC%E8%B4%A6%E7%A4%BA%E4%BE%8B"><span class="toc-number">5.3.</span> <span class="toc-text">资金转账示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ACID%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3"><span class="toc-number">6.</span> <span class="toc-text">ACID特性详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">6.1.</span> <span class="toc-text">1. 一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="toc-number">6.2.</span> <span class="toc-text">2. 原子性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E9%9A%94%E7%A6%BB%E6%80%A7"><span class="toc-number">6.3.</span> <span class="toc-text">3. 隔离性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%8C%81%E4%B9%85%E6%80%A7"><span class="toc-number">6.4.</span> <span class="toc-text">4. 持久性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ACID%E7%89%B9%E6%80%A7%E7%9A%84%E4%BF%9D%E9%9A%9C%E6%9C%BA%E5%88%B6"><span class="toc-number">6.5.</span> <span class="toc-text">ACID特性的保障机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-4-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E5%AD%90%E6%80%A7%E4%B8%8E%E6%8C%81%E4%B9%85%E6%80%A7%EF%BC%88%E7%8A%B6%E6%80%81%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="toc-number">7.</span> <span class="toc-text">17.4 事务原子性与持久性（状态模型）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%AE%9A%E4%B9%89"><span class="toc-number">7.1.</span> <span class="toc-text">关键定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%EF%BC%88%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BC%89"><span class="toc-number">7.2.</span> <span class="toc-text">事务状态（生命周期）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E5%9B%BE-%E5%9B%BE17-1"><span class="toc-number">7.3.</span> <span class="toc-text">事务状态图 (图17.1)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%90%E5%8A%9F%E6%8F%90%E4%BA%A4%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%B5%81%E7%A8%8B"><span class="toc-number">7.4.</span> <span class="toc-text">成功提交的事务流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E6%BB%9A%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%B5%81%E7%A8%8B"><span class="toc-number">7.5.</span> <span class="toc-text">回滚的事务流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E8%AF%A6%E8%BF%B0"><span class="toc-number">7.6.</span> <span class="toc-text">事务状态详述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E4%BA%8B%E5%8A%A1%E4%B8%AD%E7%9A%84%E5%9B%9E%E6%BB%9A"><span class="toc-number">7.7.</span> <span class="toc-text">示例：事务中的回滚</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-5-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB"><span class="toc-number">8.</span> <span class="toc-text">17.5 事务隔离</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E4%BA%8B%E5%8A%A1%E7%9A%84%E8%B0%83%E5%BA%A6"><span class="toc-number">8.1.</span> <span class="toc-text">并发事务的调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E6%89%A7%E8%A1%8C%E4%B8%8E%E8%B0%83%E5%BA%A6"><span class="toc-number">8.2.</span> <span class="toc-text">并发执行与调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90"><span class="toc-number">8.3.</span> <span class="toc-text">示例：并发调度分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%B2%E8%A1%8C%E8%B0%83%E5%BA%A6-S1-T%E2%82%81-T%E2%82%82"><span class="toc-number">8.3.1.</span> <span class="toc-text">串行调度 S1 (T₁; T₂)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%B2%E8%A1%8C%E8%B0%83%E5%BA%A6-S2-T%E2%82%82-T%E2%82%81"><span class="toc-number">8.3.2.</span> <span class="toc-text">串行调度 S2 (T₂; T₁)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6-S3"><span class="toc-number">8.3.3.</span> <span class="toc-text">并发调度 S3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6-S4"><span class="toc-number">8.3.4.</span> <span class="toc-text">并发调度 S4</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88S3%E6%AD%A3%E7%A1%AE%E8%80%8CS4%E9%94%99%E8%AF%AF%EF%BC%9F"><span class="toc-number">8.4.</span> <span class="toc-text">为什么S3正确而S4错误？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-6-%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.</span> <span class="toc-text">17.6 可串行化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.1.</span> <span class="toc-text">可串行化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.2.</span> <span class="toc-text">冲突可串行化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E7%AD%89%E4%BB%B7"><span class="toc-number">9.2.1.</span> <span class="toc-text">冲突等价</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96-1"><span class="toc-number">9.2.2.</span> <span class="toc-text">冲突可串行化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96%E7%9A%84%E5%88%A4%E5%AE%9A%E6%96%B9%E6%B3%95"><span class="toc-number">9.3.</span> <span class="toc-text">冲突可串行化的判定方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B1%EF%BC%9A%E5%88%A4%E5%AE%9A%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.4.</span> <span class="toc-text">示例1：判定冲突可串行化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96%E8%B0%83%E5%BA%A6"><span class="toc-number">9.5.</span> <span class="toc-text">构建冲突可串行化调度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-7-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E6%80%A7%E4%B8%8E%E5%8E%9F%E5%AD%90%E6%80%A7%EF%BC%88%E8%80%83%E8%99%91%E6%95%85%E9%9A%9C%E7%9A%84%E8%B0%83%E5%BA%A6%EF%BC%89"><span class="toc-number">10.</span> <span class="toc-text">17.7 事务隔离性与原子性（考虑故障的调度）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E6%81%A2%E5%A4%8D%E8%B0%83%E5%BA%A6"><span class="toc-number">10.1.</span> <span class="toc-text">可恢复调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B1%EF%BC%9A%E4%B8%8D%E5%8F%AF%E6%81%A2%E5%A4%8D%E8%B0%83%E5%BA%A6%EF%BC%88%E8%BF%9D%E5%8F%8D%E5%AE%8C%E6%95%B4%E6%80%A7%E7%BA%A6%E6%9D%9F%EF%BC%89"><span class="toc-number">10.2.</span> <span class="toc-text">示例1：不可恢复调度（违反完整性约束）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQL-Server%E4%B8%AD%E7%9A%84%E5%9B%9E%E6%BB%9A%E8%AE%BE%E7%BD%AE%EF%BC%9ASET-XACT-ABORT"><span class="toc-number">10.3.</span> <span class="toc-text">SQL Server中的回滚设置：SET XACT_ABORT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B2%EF%BC%9A%E4%B8%8D%E5%8F%AF%E6%81%A2%E5%A4%8D%E8%B0%83%E5%BA%A6%EF%BC%88%E7%AE%80%E5%8D%95%E8%AF%BB%E5%86%99%EF%BC%89"><span class="toc-number">10.4.</span> <span class="toc-text">示例2：不可恢复调度（简单读写）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E7%BA%A7%E8%81%94%E5%9B%9E%E6%BB%9A%E8%B0%83%E5%BA%A6"><span class="toc-number">10.5.</span> <span class="toc-text">无级联回滚调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E7%BA%A7%E8%81%94%E5%9B%9E%E6%BB%9A%E8%B0%83%E5%BA%A6-1"><span class="toc-number">10.6.</span> <span class="toc-text">无级联回滚调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">10.7.</span> <span class="toc-text">例题分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95-17-1-SQL-Server-%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-number">11.</span> <span class="toc-text">附录 17-1 SQL Server 中的事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E4%BA%8B%E5%8A%A1%E6%89%A7%E8%A1%8C%E6%A8%A1%E5%BC%8F"><span class="toc-number">11.1.</span> <span class="toc-text">三种事务执行模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQL-Server-%E6%89%B9%E5%A4%84%E7%90%86%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-number">11.2.</span> <span class="toc-text">SQL Server 批处理中的事务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95-17-2-%E4%BF%9D%E5%AD%98%E7%82%B9"><span class="toc-number">12.</span> <span class="toc-text">附录 17-2 保存点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC17%E7%AB%A0-%E4%BA%8B%E5%8A%A1%EF%BC%9A%E5%A4%A7%E7%BA%B2%E6%A6%82%E8%A6%81"><span class="toc-number">13.</span> <span class="toc-text">第17章 事务：大纲概要</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#I-%E4%BA%8B%E5%8A%A1%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%89%B9%E6%80%A7"><span class="toc-number">13.1.</span> <span class="toc-text">I. 事务概念与特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#II-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E5%AD%90%E6%80%A7%E4%B8%8E%E6%8C%81%E4%B9%85%E6%80%A7"><span class="toc-number">13.2.</span> <span class="toc-text">II. 事务原子性与持久性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#III-%E5%A4%9A%E4%BA%8B%E5%8A%A1%E5%B9%B6%E5%8F%91%E6%89%A7%E8%A1%8C"><span class="toc-number">13.3.</span> <span class="toc-text">III. 多事务并发执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IV-%E6%AD%A3%E7%A1%AE%E7%9A%84%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6%EF%BC%88%E8%80%83%E8%99%91%E6%95%85%E9%9A%9C%E6%97%B6%EF%BC%89"><span class="toc-number">13.4.</span> <span class="toc-text">IV. 正确的并发调度（考虑故障时）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#V-%E4%BA%8B%E5%8A%A1%E5%9C%A8SQL%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">13.5.</span> <span class="toc-text">V. 事务在SQL中的实现</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_Transaction/" title="§17 Transaction 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§17 Transaction 解读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_Transaction/" title="§17 Transaction 解读">§17 Transaction 解读</a><time datetime="2025-12-27T17:32:13.329Z" title="发表于 2025-12-28 01:32:13">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§16 Query Optimization 解读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读">§16 Query Optimization 解读</a><time datetime="2025-12-27T17:13:55.730Z" title="发表于 2025-12-28 01:13:55">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§15 Query Processing 简读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读">§15 Query Processing 简读</a><time datetime="2025-12-27T16:13:06.413Z" title="发表于 2025-12-28 00:13:06">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§14 Indexing 解读"/></a><div class="content"><a class="title" href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读">§14 Indexing 解读</a><time datetime="2025-12-27T13:25:49.244Z" title="发表于 2025-12-27 21:25:49">2025-12-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/" title="§13 Data Storage Structures 简读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§13 Data Storage Structures 简读"/></a><div class="content"><a class="title" href="/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/" title="§13 Data Storage Structures 简读">§13 Data Storage Structures 简读</a><time datetime="2025-12-27T08:01:17.698Z" title="发表于 2025-12-27 16:01:17">2025-12-27</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2025 By <a class="footer-bar-link" href="/" title="Yuejin Wu" target="_blank">Yuejin Wu</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" href="/" title="首页">首页</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">20</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">8</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 0.88rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 0.88rem;">Database<sup>12</sup></a><a href="/tags/English/" style="font-size: 0.88rem;">English<sup>1</sup></a><a href="/tags/RNN/" style="font-size: 0.88rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 0.88rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 0.88rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 0.88rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 0.88rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 0.88rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+</div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">Yuejin Wu</h1><div class="author-info__desc"></div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/YuejinWu/YuejinWu.github.io" target="_blank" title="Github"></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC17%E7%AB%A0%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text"> 第17章：事务管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC5%E9%83%A8%E5%88%86%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text"> 第5部分：事务管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text"> 事务管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#171-%E4%BA%8B%E5%8A%A1%E6%A6%82%E5%BF%B5"><span class="toc-number">4.</span> <span class="toc-text"> 17.1 事务概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%891"><span class="toc-number">4.1.</span> <span class="toc-text"> 定义1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%892"><span class="toc-number">4.2.</span> <span class="toc-text"> 定义2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%94%B1%E8%AF%BB%E5%86%99%E5%85%83%E6%93%8D%E4%BD%9C%E5%AE%9A%E4%B9%89%E9%80%BB%E8%BE%91%E8%AF%BB-%E9%80%BB%E8%BE%91%E5%86%99"><span class="toc-number">4.3.</span> <span class="toc-text"> 事务：由读写元操作定义【逻辑读、逻辑写】</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8C%85%E5%90%AB%E5%9B%9E%E6%BB%9A%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-number">4.4.</span> <span class="toc-text"> 包含回滚的事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql%E8%AF%AD%E5%8F%A5-vs-%E8%AF%BB%E5%86%99%E5%85%83%E6%93%8D%E4%BD%9C"><span class="toc-number">4.5.</span> <span class="toc-text"> SQL语句 vs. 读写元操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-server%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%A4%BA%E4%BE%8B"><span class="toc-number">4.6.</span> <span class="toc-text"> SQL Server中的事务示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#172-%E4%BA%8B%E5%8A%A1%E6%A8%A1%E5%9E%8B"><span class="toc-number">5.</span> <span class="toc-text"> 17.2 事务模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E6%93%8D%E4%BD%9C%E5%AE%9A%E4%B9%89"><span class="toc-number">5.1.</span> <span class="toc-text"> 事务模型中的操作定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E8%AF%BB%E5%86%99%E6%93%8D%E4%BD%9C%E7%A4%BA%E6%84%8F%E5%9B%BE"><span class="toc-number">5.2.</span> <span class="toc-text"> 事务读写操作示意图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%BD%AC%E8%B4%A6%E7%A4%BA%E4%BE%8B"><span class="toc-number">5.3.</span> <span class="toc-text"> 资金转账示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#acid%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3"><span class="toc-number">6.</span> <span class="toc-text"> ACID特性详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">6.1.</span> <span class="toc-text"> 1. 一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="toc-number">6.2.</span> <span class="toc-text"> 2. 原子性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E9%9A%94%E7%A6%BB%E6%80%A7"><span class="toc-number">6.3.</span> <span class="toc-text"> 3. 隔离性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%8C%81%E4%B9%85%E6%80%A7"><span class="toc-number">6.4.</span> <span class="toc-text"> 4. 持久性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#acid%E7%89%B9%E6%80%A7%E7%9A%84%E4%BF%9D%E9%9A%9C%E6%9C%BA%E5%88%B6"><span class="toc-number">6.5.</span> <span class="toc-text"> ACID特性的保障机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#174-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E5%AD%90%E6%80%A7%E4%B8%8E%E6%8C%81%E4%B9%85%E6%80%A7%E7%8A%B6%E6%80%81%E6%A8%A1%E5%9E%8B"><span class="toc-number">7.</span> <span class="toc-text"> 17.4 事务原子性与持久性（状态模型）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%AE%9A%E4%B9%89"><span class="toc-number">7.1.</span> <span class="toc-text"> 关键定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">7.2.</span> <span class="toc-text"> 事务状态（生命周期）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E5%9B%BE-%E5%9B%BE171"><span class="toc-number">7.3.</span> <span class="toc-text"> 事务状态图 (图17.1)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%90%E5%8A%9F%E6%8F%90%E4%BA%A4%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%B5%81%E7%A8%8B"><span class="toc-number">7.4.</span> <span class="toc-text"> 成功提交的事务流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E6%BB%9A%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%B5%81%E7%A8%8B"><span class="toc-number">7.5.</span> <span class="toc-text"> 回滚的事务流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E8%AF%A6%E8%BF%B0"><span class="toc-number">7.6.</span> <span class="toc-text"> 事务状态详述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%E4%BA%8B%E5%8A%A1%E4%B8%AD%E7%9A%84%E5%9B%9E%E6%BB%9A"><span class="toc-number">7.7.</span> <span class="toc-text"> 示例：事务中的回滚</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#175-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB"><span class="toc-number">8.</span> <span class="toc-text"> 17.5 事务隔离</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E4%BA%8B%E5%8A%A1%E7%9A%84%E8%B0%83%E5%BA%A6"><span class="toc-number">8.1.</span> <span class="toc-text"> 并发事务的调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E6%89%A7%E8%A1%8C%E4%B8%8E%E8%B0%83%E5%BA%A6"><span class="toc-number">8.2.</span> <span class="toc-text"> 并发执行与调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90"><span class="toc-number">8.3.</span> <span class="toc-text"> 示例：并发调度分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%B2%E8%A1%8C%E8%B0%83%E5%BA%A6-s1-t1-t2"><span class="toc-number">8.3.1.</span> <span class="toc-text"> 串行调度 S1 (T₁; T₂)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%B2%E8%A1%8C%E8%B0%83%E5%BA%A6-s2-t2-t1"><span class="toc-number">8.3.2.</span> <span class="toc-text"> 串行调度 S2 (T₂; T₁)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6-s3"><span class="toc-number">8.3.3.</span> <span class="toc-text"> 并发调度 S3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6-s4"><span class="toc-number">8.3.4.</span> <span class="toc-text"> 并发调度 S4</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88s3%E6%AD%A3%E7%A1%AE%E8%80%8Cs4%E9%94%99%E8%AF%AF"><span class="toc-number">8.4.</span> <span class="toc-text"> 为什么S3正确而S4错误？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#176-%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.</span> <span class="toc-text"> 17.6 可串行化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.1.</span> <span class="toc-text"> 可串行化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.2.</span> <span class="toc-text"> 冲突可串行化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E7%AD%89%E4%BB%B7"><span class="toc-number">9.2.1.</span> <span class="toc-text"> 冲突等价</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96-2"><span class="toc-number">9.2.2.</span> <span class="toc-text"> 冲突可串行化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96%E7%9A%84%E5%88%A4%E5%AE%9A%E6%96%B9%E6%B3%95"><span class="toc-number">9.3.</span> <span class="toc-text"> 冲突可串行化的判定方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B1%E5%88%A4%E5%AE%9A%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="toc-number">9.4.</span> <span class="toc-text"> 示例1：判定冲突可串行化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96%E8%B0%83%E5%BA%A6"><span class="toc-number">9.5.</span> <span class="toc-text"> 构建冲突可串行化调度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#177-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E6%80%A7%E4%B8%8E%E5%8E%9F%E5%AD%90%E6%80%A7%E8%80%83%E8%99%91%E6%95%85%E9%9A%9C%E7%9A%84%E8%B0%83%E5%BA%A6"><span class="toc-number">10.</span> <span class="toc-text"> 17.7 事务隔离性与原子性（考虑故障的调度）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E6%81%A2%E5%A4%8D%E8%B0%83%E5%BA%A6"><span class="toc-number">10.1.</span> <span class="toc-text"> 可恢复调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B1%E4%B8%8D%E5%8F%AF%E6%81%A2%E5%A4%8D%E8%B0%83%E5%BA%A6%E8%BF%9D%E5%8F%8D%E5%AE%8C%E6%95%B4%E6%80%A7%E7%BA%A6%E6%9D%9F"><span class="toc-number">10.2.</span> <span class="toc-text"> 示例1：不可恢复调度（违反完整性约束）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-server%E4%B8%AD%E7%9A%84%E5%9B%9E%E6%BB%9A%E8%AE%BE%E7%BD%AEset-xact_abort"><span class="toc-number">10.3.</span> <span class="toc-text"> SQL Server中的回滚设置：SET XACT_ABORT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B2%E4%B8%8D%E5%8F%AF%E6%81%A2%E5%A4%8D%E8%B0%83%E5%BA%A6%E7%AE%80%E5%8D%95%E8%AF%BB%E5%86%99"><span class="toc-number">10.4.</span> <span class="toc-text"> 示例2：不可恢复调度（简单读写）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E7%BA%A7%E8%81%94%E5%9B%9E%E6%BB%9A%E8%B0%83%E5%BA%A6"><span class="toc-number">10.5.</span> <span class="toc-text"> 无级联回滚调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E7%BA%A7%E8%81%94%E5%9B%9E%E6%BB%9A%E8%B0%83%E5%BA%A6-2"><span class="toc-number">10.6.</span> <span class="toc-text"> 无级联回滚调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">10.7.</span> <span class="toc-text"> 例题分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95-17-1-sql-server-%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-number">11.</span> <span class="toc-text"> 附录 17-1 SQL Server 中的事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E4%BA%8B%E5%8A%A1%E6%89%A7%E8%A1%8C%E6%A8%A1%E5%BC%8F"><span class="toc-number">11.1.</span> <span class="toc-text"> 三种事务执行模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-server-%E6%89%B9%E5%A4%84%E7%90%86%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="toc-number">11.2.</span> <span class="toc-text"> SQL Server 批处理中的事务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95-17-2-%E4%BF%9D%E5%AD%98%E7%82%B9"><span class="toc-number">12.</span> <span class="toc-text"> 附录 17-2 保存点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC17%E7%AB%A0-%E4%BA%8B%E5%8A%A1%E5%A4%A7%E7%BA%B2%E6%A6%82%E8%A6%81"><span class="toc-number">13.</span> <span class="toc-text"> 第17章 事务：大纲概要</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#i-%E4%BA%8B%E5%8A%A1%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%89%B9%E6%80%A7"><span class="toc-number">13.1.</span> <span class="toc-text"> I. 事务概念与特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ii-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E5%AD%90%E6%80%A7%E4%B8%8E%E6%8C%81%E4%B9%85%E6%80%A7"><span class="toc-number">13.2.</span> <span class="toc-text"> II. 事务原子性与持久性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iii-%E5%A4%9A%E4%BA%8B%E5%8A%A1%E5%B9%B6%E5%8F%91%E6%89%A7%E8%A1%8C"><span class="toc-number">13.3.</span> <span class="toc-text"> III. 多事务并发执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#iv-%E6%AD%A3%E7%A1%AE%E7%9A%84%E5%B9%B6%E5%8F%91%E8%B0%83%E5%BA%A6%E8%80%83%E8%99%91%E6%95%85%E9%9A%9C%E6%97%B6"><span class="toc-number">13.4.</span> <span class="toc-text"> IV. 正确的并发调度（考虑故障时）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#v-%E4%BA%8B%E5%8A%A1%E5%9C%A8sql%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">13.5.</span> <span class="toc-text"> V. 事务在SQL中的实现</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_Transaction/" title="§17 Transaction 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§17 Transaction 解读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_Transaction/" title="§17 Transaction 解读">§17 Transaction 解读</a><time datetime="2025-12-27T17:32:13.329Z" title="发表于 2025-12-28 01:32:13">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§16 Query Optimization 解读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读">§16 Query Optimization 解读</a><time datetime="2025-12-27T17:13:55.730Z" title="发表于 2025-12-28 01:13:55">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§15 Query Processing 简读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读">§15 Query Processing 简读</a><time datetime="2025-12-27T16:13:06.413Z" title="发表于 2025-12-28 00:13:06">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§14 Indexing 解读"/></a><div class="content"><a class="title" href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读">§14 Indexing 解读</a><time datetime="2025-12-27T13:25:49.244Z" title="发表于 2025-12-27 21:25:49">2025-12-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/" title="§13 Data Storage Structures 简读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§13 Data Storage Structures 简读"/></a><div class="content"><a class="title" href="/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/" title="§13 Data Storage Structures 简读">§13 Data Storage Structures 简读</a><time datetime="2025-12-27T08:01:17.698Z" title="发表于 2025-12-27 16:01:17">2025-12-27</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2025 By <a class="footer-bar-link" href="/" title="Yuejin Wu" target="_blank">Yuejin Wu</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" href="/" title="首页">首页</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">20</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">8</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 0.88rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 0.88rem;">Database<sup>12</sup></a><a href="/tags/English/" style="font-size: 0.88rem;">English<sup>1</sup></a><a href="/tags/RNN/" style="font-size: 0.88rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 0.88rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 0.88rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 0.88rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 0.88rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 0.88rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
 var HoldLog = console.log;
 console.log = function () {};
 let now1 = new Date();
