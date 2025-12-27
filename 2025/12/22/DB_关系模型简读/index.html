@@ -321,10 +321,9 @@ if (true) {
 <p>属性表示一个“对象的特征”</p>
 </li>
 <li>
-<p>用符号表示：<br>
-$$<br>
-A_1, A_2, \dots, A_n<br>
-$$</p>
+<p>用符号表示：</p>
+A_1, A_2, \dots, A_n
+
 </li>
 </ul>
 <p>📌 例子（instructor）：</p>
@@ -339,9 +338,8 @@ $$</p>
 <blockquote>
 <p><strong>域 = 属性允许取值的集合</strong></p>
 </blockquote>
-<p>$$<br>
-D_i = { 所有 A_i 可以取的合法值 }<br>
-$$</p>
+D_i = { 所有 A_i 可以取的合法值 }
+
 <p>📌 例：</p>
 <ul>
 <li>ID ∈ char(5)</li>
@@ -357,11 +355,10 @@ $$</p>
 <blockquote>
 <p><strong>描述“表长什么样”</strong></p>
 </blockquote>
-<p>形式化定义：<br>
-$$<br>
-R = (A_1, A_2, \dots, A_n)<br>
-$$<br>
-📌 instructor 模式：</p>
+<p>形式化定义：</p>
+R = (A_1, A_2, \dots, A_n)
+
+<p>📌 instructor 模式：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">instructor(ID, name, dept_name, salary)</span><br></pre></td></tr></table></figure>
 <hr>
 <h3 id="4️⃣-关系实例（Relation-Instance）">4️⃣ 关系实例（Relation Instance）</h3>
@@ -382,10 +379,9 @@ $$<br>
 <li>一个元组 = 一行数据</li>
 <li>是属性 → 值的映射</li>
 </ul>
-<p>数学上可理解为函数：<br>
-$$<br>
-t(A_i) \rightarrow D_i<br>
-$$</p>
+<p>数学上可理解为函数：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>t</mi><mo>(</mo><msub><mi>A</mi><mi>i</mi></msub><mo>)</mo><mo>→</mo><msub><mi>D</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">t(A_i) \rightarrow D_i
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit">t</span><span class="mopen">(</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span><span class="mrel">→</span><span class="mord"><span class="mord mathit" style="margin-right:0.02778em;">D</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.02778em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span></span></p>
 <hr>
 <h2 id="三、属性的本质约束（非常重要）">三、属性的本质约束（非常重要）</h2>
 <hr>
@@ -437,9 +433,8 @@ Null ≠ 空字符串</p>
 </ul>
 <hr>
 <h3 id="2️⃣-属性无序">2️⃣ 属性无序</h3>
-<p>$$<br>
-(A_1, A_2, A_3) = (A_3, A_1, A_2)<br>
-$$</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><msub><mi>A</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>A</mi><mn>2</mn></msub><mo separator="true">,</mo><msub><mi>A</mi><mn>3</mn></msub><mo>)</mo><mo>=</mo><mo>(</mo><msub><mi>A</mi><mn>3</mn></msub><mo separator="true">,</mo><msub><mi>A</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>A</mi><mn>2</mn></msub><mo>)</mo></mrow><annotation encoding="application/x-tex">(A_1, A_2, A_3) = (A_3, A_1, A_2)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base displaystyle textstyle uncramped"><span class="mopen">(</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mpunct">,</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mpunct">,</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">3</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span><span class="mrel">=</span><span class="mopen">(</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">3</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mpunct">,</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mpunct">,</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span></span></span></span></span></p>
 <p>👉 这就是为什么 <strong>SQL 必须写列名</strong></p>
 <hr>
 <h2 id="五、数据库模式与实例（Schema-vs-Instance）">五、数据库模式与实例（Schema vs Instance）</h2>
@@ -463,11 +458,10 @@ $$</p>
 <p>能唯一标识元组的<strong>属性集合</strong></p>
 </blockquote>
 <p>形式化定义：</p>
-<p>若<br>
-$$<br>
-t_1 \neq t_2 \Rightarrow t_1[K] \neq t_2[K]<br>
-$$<br>
-则 K 是超键</p>
+<p>若</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>t</mi><mn>1</mn></msub><mo>≠</mo><msub><mi>t</mi><mn>2</mn></msub><mo>⇒</mo><msub><mi>t</mi><mn>1</mn></msub><mo>[</mo><mi>K</mi><mo>]</mo><mo>≠</mo><msub><mi>t</mi><mn>2</mn></msub><mo>[</mo><mi>K</mi><mo>]</mo></mrow><annotation encoding="application/x-tex">t_1 \neq t_2 \Rightarrow t_1[K] \neq t_2[K]
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord"><span class="mord mathit">t</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mrel">≠</span><span class="mord"><span class="mord mathit">t</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mrel">⇒</span><span class="mord"><span class="mord mathit">t</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">[</span><span class="mord mathit" style="margin-right:0.07153em;">K</span><span class="mclose">]</span><span class="mrel">≠</span><span class="mord"><span class="mord mathit">t</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">[</span><span class="mord mathit" style="margin-right:0.07153em;">K</span><span class="mclose">]</span></span></span></span></span></p>
+<p>则 K 是超键</p>
 <p>📌 示例：</p>
 <ul>
 <li>{ID}</li>
@@ -608,9 +602,8 @@ SQL = 声明式（但底层会转成代数）</p>
 </table>
 <hr>
 <h3 id="3️⃣-选择（σ）">3️⃣ 选择（σ）</h3>
-<p>$$<br>
-\sigma_{条件}®<br>
-$$</p>
+\sigma_{条件}(r)
+
 <ul>
 <li>条件是布尔表达式</li>
 <li>支持：
@@ -625,9 +618,8 @@ $$</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">where</span> ...</span><br></pre></td></tr></table></figure>
 <hr>
 <h3 id="4️⃣-投影（π）">4️⃣ 投影（π）</h3>
-<p>$$<br>
-\pi_{A_1,A_2}®<br>
-$$</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>π</mi><mrow><msub><mi>A</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>A</mi><mn>2</mn></msub></mrow></msub><mo>(</mo><mi>r</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">\pi_{A_1,A_2}(r)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.03588em;">π</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.03588em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.07142857142857144em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-scriptstyle scriptscriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mpunct">,</span><span class="mord"><span class="mord mathit">A</span><span class="vlist"><span style="top:0.15em;margin-right:0.07142857142857144em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-scriptstyle scriptscriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">(</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mclose">)</span></span></span></span></span></p>
 <ul>
 <li>只保留指定列</li>
 <li>自动去重</li>
@@ -636,9 +628,8 @@ $$</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> ...</span><br></pre></td></tr></table></figure>
 <hr>
 <h3 id="5️⃣-连接-笛卡尔积-选择">5️⃣ 连接 = 笛卡尔积 + 选择</h3>
-<p>$$<br>
-\sigma_{r.A = s.B}(r \times s)<br>
-$$</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>σ</mi><mrow><mi>r</mi><mi mathvariant="normal">.</mi><mi>A</mi><mo>=</mo><mi>s</mi><mi mathvariant="normal">.</mi><mi>B</mi></mrow></msub><mo>(</mo><mi>r</mi><mo>×</mo><mi>s</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">\sigma_{r.A = s.B}(r \times s)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.03588em;">σ</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.03588em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mord mathrm">.</span><span class="mord mathit">A</span><span class="mrel">=</span><span class="mord mathit">s</span><span class="mord mathrm">.</span><span class="mord mathit" style="margin-right:0.05017em;">B</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">(</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mbin">×</span><span class="mord mathit">s</span><span class="mclose">)</span></span></span></span></span></p>
 <p>👉 自然连接是语法糖</p>
 <hr>
 <h3 id="6️⃣-查询等价与优化">6️⃣ 查询等价与优化</h3>
@@ -658,7 +649,7 @@ $$</p>
   input.setSelectionRange(0, 99999);
   document.execCommand("copy");
   document.body.removeChild(input);
-}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Yuejin's Blog</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>数据库<span class="categoryesPageCount">12</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Database/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Database<span class="tagsPageCount">12</span></a><a class="post-meta__box__tags" href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>关系模型<span class="tagsPageCount">1</span></a></div></div><div class="post_share"><div class="social-share" data-image="/img/C7_cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/12/16/self-attention%E7%AE%80%E8%AF%BB/"><img class="prev-cover" src="/img/selfatten_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">自注意力机制_简读</div></div></a></div><div class="next-post pull-right"><a href="/2025/12/22/DB_SQL%20%E8%AF%AD%E8%A8%80%E7%AE%80%E8%AF%BB/"><img class="next-cover" src="/img/SQL_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">§3 Intro-to-SQL 简读</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-27</div><div class="title">§14 Indexing 解读</div></div></a></div><div><a href="/2025/12/24/DB_Intermediate%20SQL/" title="§4 Intermediate-SQL 解读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§4 Intermediate-SQL 解读</div></div></a></div><div><a href="/2025/12/24/DB_AdvancedSQL/" title="§5 Advanced-SQL课件详解"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§5 Advanced-SQL课件详解</div></div></a></div><div><a href="/2025/12/26/DB_E-R%20Model/" title="§6 E-R Model 解读"><img class="cover" src="/img/ER_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-26</div><div class="title">§6 E-R Model 解读</div></div></a></div><div><a href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-28</div><div class="title">§16 Query Optimization 解读</div></div></a></div><div><a href="/2025/12/22/DB_SQL%20%E8%AF%AD%E8%A8%80%E7%AE%80%E8%AF%BB/" title="§3 Intro-to-SQL 简读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-22</div><div class="title">§3 Intro-to-SQL 简读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src="/img/my_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"><div class="author-intro" style="line-height: 1.7; text-align: center; font-family: inherit; margin-top: -0.5rem; margin-bottom: 0.5rem;">
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Yuejin's Blog</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>数据库<span class="categoryesPageCount">12</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Database/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Database<span class="tagsPageCount">12</span></a><a class="post-meta__box__tags" href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>关系模型<span class="tagsPageCount">1</span></a></div></div><div class="post_share"><div class="social-share" data-image="/img/C7_cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/12/16/self-attention%E7%AE%80%E8%AF%BB/"><img class="prev-cover" src="/img/selfatten_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">自注意力机制_简读</div></div></a></div><div class="next-post pull-right"><a href="/2025/12/22/DB_SQL%20%E8%AF%AD%E8%A8%80%E7%AE%80%E8%AF%BB/"><img class="next-cover" src="/img/SQL_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">§3 Intro-to-SQL 简读</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/12/24/DB_AdvancedSQL/" title="§5 Advanced-SQL课件详解"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§5 Advanced-SQL课件详解</div></div></a></div><div><a href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-27</div><div class="title">§14 Indexing 解读</div></div></a></div><div><a href="/2025/12/26/DB_E-R%20Model/" title="§6 E-R Model 解读"><img class="cover" src="/img/ER_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-26</div><div class="title">§6 E-R Model 解读</div></div></a></div><div><a href="/2025/12/24/DB_Intermediate%20SQL/" title="§4 Intermediate-SQL 解读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§4 Intermediate-SQL 解读</div></div></a></div><div><a href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-28</div><div class="title">§15 Query Processing 简读</div></div></a></div><div><a href="/2025/12/22/DB_SQL%20%E8%AF%AD%E8%A8%80%E7%AE%80%E8%AF%BB/" title="§3 Intro-to-SQL 简读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-22</div><div class="title">§3 Intro-to-SQL 简读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src="/img/my_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"><div class="author-intro" style="line-height: 1.7; text-align: center; font-family: inherit; margin-top: -0.5rem; margin-bottom: 0.5rem;">
   <p style="font-size: 1.15rem; margin-bottom: 0.8rem; font-weight: 500; color: var(--anzhiyu-fontcolor);">你好，我是 <span style="color: #00ffcc; font-weight: 600; text-shadow: 0 0 5px #00ffccaa;">Yuejin Wu</span>！👋</p>
   <p style="font-size: 1.05rem; margin-bottom: 0.6rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">BUPT 本科生 · 人工智能专业</p>
   <p style="font-size: 1.05rem; margin-bottom: 1rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">记录学习、思考与生活</p>
