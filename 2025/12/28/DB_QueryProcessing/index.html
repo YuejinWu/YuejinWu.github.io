@@ -1,0 +1,580 @@
+<!DOCTYPE html><html lang="en &amp;&amp; zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>§15 Query Processing 简读 | Yuejin's Blog</title><meta name="keywords" content="Database"><meta name="author" content="Yuejin Wu"><meta name="copyright" content="Yuejin Wu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="§15 Query Processing 简读"><meta name="application-name" content="§15 Query Processing 简读"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="§15 Query Processing 简读"><meta property="og:url" content="http://example.com/2025/12/28/DB_QueryProcessing/index.html"><meta property="og:site_name" content="Yuejin's Blog"><meta property="og:description" content="数据库查询处理一、查询处理概述1.1 查询处理的定义与目标 定义：查询处理是指DBMS从数据库中提取数据的一系列活动，包括： 将高级查询语言（如SQL）翻译成可在物理层使用的表达式（如关系代数表达式）。 进行查询优化变换，寻找高效执行方案。 实际执行查询并返回结果。    1.2 查询处理的三个阶段"><meta property="og:locale" content="en &amp;&amp; zh-Hans"><meta property="og:image" content="http://example.com/img/C7_cover.png"><meta property="article:author" content="Yuejin Wu"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="http://example.com/img/C7_cover.png"><meta name="description" content="数据库查询处理一、查询处理概述1.1 查询处理的定义与目标 定义：查询处理是指DBMS从数据库中提取数据的一系列活动，包括： 将高级查询语言（如SQL）翻译成可在物理层使用的表达式（如关系代数表达式）。 进行查询优化变换，寻找高效执行方案。 实际执行查询并返回结果。    1.2 查询处理的三个阶段"><link rel="shortcut icon" href="/img/mylogo.jpg"><link rel="canonical" href="http://example.com/2025/12/28/DB_QueryProcessing/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: {"enable":true,"ck":null,"LingQueMonitorID":null},
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: Yuejin Wu","link":"链接: ","source":"来源: Yuejin's Blog","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.2.0/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.2.0/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'Yuejin's Blog',
+  title: '§15 Query Processing 简读',
+  postAI: '',
+  pageFillDescription: '数据库查询处理, 一、查询处理概述, 1.1 查询处理的定义与目标, 1.2 查询处理的三个阶段, 二、查询代价的度量, 2.1 代价的主要构成, 2.2 磁盘访问代价的细分, 2.3 现实考虑与缓冲, 2.4 数据库系统内部Ix2FO流程, 三、选择操作（Selection）的实现算法, 3.1 基本概念与查询条件类型, 3.2 算法分类, 3.3 各算法详解, A1：线性扫描, A2：使用主索引（聚簇索引）的等值查询（针对键属性）, A3：使用主索引的等值查询（针对非键属性）, A4：使用辅助索引的等值查询, A5：使用主索引的比较查询（范围查询）, A6：使用辅助索引的比较查询, 3.4 复杂选择的实现, 合取选择（AND条件）, 析取选择（OR条件）, 否定选择（NOT条件）, 四、排序, 4.1 排序的重要性, 4.2 外部排序算法（当数据量大于内存）, 五、表达式求值, 5.1 两种基本策略, 5.2 流水线执行的原理, 六、总结数据库查询处理一查询处理概述查询处理的定义与目标定义查询处理是指从数据库中提取数据的一系列活动包括将高级查询语言如翻译成可在物理层使用的表达式如关系代数表达式进行查询优化变换寻找高效执行方案实际执行查询并返回结果查询处理的三个阶段语法解析与翻译检查语句的语法正确性验证关系视图的存在性将视图替换为其定义的基础关系生成解析树并翻译成关系代数表达式查询优化从多个等价的关系代数表达式中选择代价最低的查询执行计划代价估算基于数据字典中的统计信息如元组数元组大小等优化后的执行计划会注解具体的评估策略如使用哪个索引采用哪种连接算法等执行查询执行引擎接收优化后的计划执行它并将结果返回给用户在等系统中可查看查询执行计划及预估代价二查询代价的度量代价的主要构成总代价通常用总耗时来衡量主要受以下因素影响磁盘访问主导因素网络通信分布式环境下磁盘访问代价的细分代价磁盘块传输次数平均传输时间寻道次数平均寻道时间平均寻道时间包括寻道时间和旋转延迟平均块传输时间取决于磁盘内部传输速率简记现实考虑与缓冲算法可通过使用额外的缓冲区内存来减少磁盘可用内存大小取决于并发查询和进程优化时通常按最坏情况最小可用内存估算所需数据可能已缓存在内存中避免磁盘但这一点在代价估算中难以准确考虑数据库系统内部流程逻辑读写由事务发起如物理读写将包含数据项的磁盘页读入缓冲区将修改后的缓冲区页写回磁盘缓冲区管理采用等策略进行页替换三选择操作的实现算法基本概念与查询条件类型选择操作从关系中检索满足条件的记录查询条件类型等值条件如范围条件如比较条件如可视为范围查询的特例算法分类线性扫描文件扫描使用索引的选择等值条件涉及比较的选择范围条件复杂选择合取析取否定各算法详解线性扫描扫描关系的每一个块测试所有记录代价次块传输次寻道若选择基于主键属性的等值条件找到即可停止平均代价为次块传输次寻道适用性适用于任何条件无论记录顺序有无索引特别适合堆文件或对非索引属性的扫描使用主索引聚簇索引的等值查询针对键属性利用树主索引检索单个记录如代价其中为树高使用主索引的等值查询针对非键属性检索多个记录如这些记录物理上连续存储代价其中为包含匹配记录的块数使用辅助索引的等值查询针对键属性检索单个记录代价同针对非键属性检索个记录每个记录可能位于不同块代价最坏情况下每个记录需一次使用主索引的比较查询范围查询关系已按属性排序聚簇索引对于用索引找到第一个的元组然后顺序扫描对于直接顺序扫描至第一个的元组不使用索引代价为匹配记录所占块数使用辅助索引的比较查询对于用索引找到第一个的索引项然后顺序扫描索引叶节点获取记录指针对于扫描索引叶节点直至第一个的项获取指针代价每个匹配记录可能需一次注意当较大时线性扫描可能更便宜复杂选择的实现合取选择条件使用一个索引选择一个代价最低的条件用索引检索满足该条件的元组在内存缓冲区中检查这些元组是否满足其余条件使用复合索引若有合适的多属性索引直接使用标识符交集法对每个有条件索引的条件分别获取记录指针集然后取交集对无索引的条件在内存中测试析取选择条件标识符并集法若所有条件都有可用索引分别获取指针集后取并集否则退化为线性扫描否定选择条件通常使用线性扫描若满足否定的记录很少且原条件有索引可先通过索引找到满足的记录再从文件中排除它们四排序排序的重要性用于等子句连接操作前对关系排序可大幅提升效率如归并连接物理排序后可以建立有序索引如树外部排序算法当数据量大于内存生成初始有序段重复将个块读入内存排序后写回磁盘形成有序段设最终生成个有序段归并有序段使用多路归并将多个有序段合并为更大的有序段直至整个关系有序归并的趟数约为五表达式求值两种基本策略物化逐步计算子表达式将中间结果临时存储到磁盘再作为输入进行下一步计算优点实现简单缺点产生额外的开销流水线多个操作同时执行一个操作产生的元组立即传递给下一个操作无需物化中间结果优点极大减少提升效率示例对于选择操作一边输出元组投影操作一边处理无需等待全部选择完成流水线执行的原理在内存中设立缓冲区操作之间通过缓冲区传递数据可实现一定程度的并行充分利用和资源六总结查询处理是将高级查询转换为高效物理执行计划的过程代价估算的核心是磁盘块传输和寻道选择操作的实现算法多样需根据索引条件类型和数据分布选择最优策略排序是许多操作的基础外部排序算法用于处理大数据集表达式求值可采用物化或流水线策略流水线能显著减少中间通过深入理解这些原理和算法数据库系统设计者和开发者能够编写更高效的查询并更好地进行系统调优',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-12-28 00:15:30',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><style>
+  /* === 只添加半透明磨砂效果，不改变任何布局 === */
+  
+  /* 1. 导航栏内所有可点击元素添加磨砂背景 */
+  #nav a,
+  #nav button {
+    /* 保持原有布局，只添加背景效果 */
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    transition: backdrop-filter 0.3s ease !important;
+  }
+  
+  /* 2. 浅色模式：白色半透明 */
+  body:not([data-theme="dark"]) #nav a,
+  body:not([data-theme="dark"]) #nav button {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* 3. 深色模式：黑色半透明 */
+  [data-theme="dark"] #nav a,
+  [data-theme="dark"] #nav button {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* 4. 悬停效果：稍微增加透明度 */
+  #nav a:hover,
+  #nav button:hover {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  
+  body:not([data-theme="dark"]) #nav a:hover,
+  body:not([data-theme="dark"]) #nav button:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  [data-theme="dark"] #nav a:hover,
+  [data-theme="dark"] #nav button:hover {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+  }
+</style>
+<link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">Yuejin's Blog</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 1.05rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 1.05rem;">Database<sup>10</sup></a><a href="/tags/English/" style="font-size: 1.05rem;">English<sup>1</sup></a><a href="/tags/RNN/" style="font-size: 1.05rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 1.05rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 1.05rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 1.05rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 1.05rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 1.05rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">18</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url">数据库</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/Database/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>Database</span></a></span></div></div><h1 class="post-title" itemprop="name headline">§15 Query Processing 简读</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2025-12-27T16:13:06.413Z" title="发表于 2025-12-28 00:13:06">2025-12-28</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2025-12-27T16:15:30.384Z" title="更新于 2025-12-28 00:15:30">2025-12-28</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为北京"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>北京</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="/img/C7_cover.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2025/12/28/DB_QueryProcessing/"><header><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url">数据库</a><a href="/tags/Database/" tabindex="-1" itemprop="url">Database</a><h1 id="CrawlerTitle" itemprop="name headline">§15 Query Processing 简读</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">Yuejin Wu</span><time itemprop="dateCreated datePublished" datetime="2025-12-27T16:13:06.413Z" title="发表于 2025-12-28 00:13:06">2025-12-28</time><time itemprop="dateCreated datePublished" datetime="2025-12-27T16:15:30.384Z" title="更新于 2025-12-28 00:15:30">2025-12-28</time></header><h3 id="数据库查询处理"><a href="#数据库查询处理" class="headerlink" title="数据库查询处理"></a>数据库查询处理</h3><h2 id="一、查询处理概述"><a href="#一、查询处理概述" class="headerlink" title="一、查询处理概述"></a>一、查询处理概述</h2><h3 id="1-1-查询处理的定义与目标"><a href="#1-1-查询处理的定义与目标" class="headerlink" title="1.1 查询处理的定义与目标"></a>1.1 查询处理的定义与目标</h3><ul>
+<li><strong>定义</strong>：查询处理是指DBMS从数据库中提取数据的一系列活动，包括：<ol>
+<li>将<strong>高级查询语言</strong>（如SQL）<strong>翻译</strong>成可在物理层使用的表达式（如关系代数表达式）。</li>
+<li>进行<strong>查询优化变换</strong>，寻找高效执行方案。</li>
+<li><strong>实际执行</strong>查询并返回结果。</li>
+</ol>
+</li>
+</ul>
+<h3 id="1-2-查询处理的三个阶段"><a href="#1-2-查询处理的三个阶段" class="headerlink" title="1.2 查询处理的三个阶段"></a>1.2 查询处理的三个阶段</h3><ol>
+<li><p><strong>语法解析与翻译</strong></p>
+<ul>
+<li>检查SQL语句的<strong>语法正确性</strong>，验证关系&#x2F;视图的存在性。</li>
+<li>将<strong>视图</strong>替换为其定义的基础关系。</li>
+<li>生成<strong>解析树</strong>，并翻译成<strong>关系代数表达式</strong>。</li>
+</ul>
+</li>
+<li><p><strong>查询优化</strong></p>
+<ul>
+<li>从多个<strong>等价</strong>的关系代数表达式中，选择<strong>代价最低</strong>的查询执行计划。</li>
+<li>代价估算基于数据字典中的统计信息（如元组数、元组大小等）。</li>
+<li>优化后的执行计划会<strong>注解</strong>具体的评估策略，如使用哪个索引、采用哪种连接算法等。</li>
+</ul>
+</li>
+<li><p><strong>执行</strong></p>
+<ul>
+<li><strong>查询执行引擎</strong>接收优化后的计划，执行它并将结果返回给用户。</li>
+<li>在SQL Server等系统中，可查看查询执行计划及预估代价。</li>
+</ul>
+</li>
+</ol>
+<h2 id="二、查询代价的度量"><a href="#二、查询代价的度量" class="headerlink" title="二、查询代价的度量"></a>二、查询代价的度量</h2><h3 id="2-1-代价的主要构成"><a href="#2-1-代价的主要构成" class="headerlink" title="2.1 代价的主要构成"></a>2.1 代价的主要构成</h3><ul>
+<li>总代价通常用<strong>总耗时</strong>来衡量，主要受以下因素影响：<ol>
+<li><strong>磁盘访问</strong>（主导因素）</li>
+<li>网络通信（分布式环境下）</li>
+</ol>
+</li>
+</ul>
+<h3 id="2-2-磁盘访问代价的细分"><a href="#2-2-磁盘访问代价的细分" class="headerlink" title="2.2 磁盘访问代价的细分"></a>2.2 磁盘访问代价的细分</h3><p>代价 &#x3D; <strong>磁盘块传输次数</strong> × <strong>平均传输时间</strong> + <strong>寻道次数</strong> × <strong>平均寻道时间</strong></p>
+<ul>
+<li><strong>平均寻道时间 (t_S)</strong>：包括寻道时间和旋转延迟。</li>
+<li><strong>平均块传输时间 (t_T)</strong>：取决于磁盘内部传输速率。</li>
+</ul>
+<p><strong>简记</strong>：Cost &#x3D; &lt;b, s&gt; &#x3D; b * t_T + s * t_S</p>
+<h3 id="2-3-现实考虑与缓冲"><a href="#2-3-现实考虑与缓冲" class="headerlink" title="2.3 现实考虑与缓冲"></a>2.3 现实考虑与缓冲</h3><ul>
+<li>算法可通过使用额外的<strong>缓冲区内存</strong>来减少磁盘I&#x2F;O。</li>
+<li>可用内存大小取决于并发查询和进程，优化时通常按<strong>最坏情况</strong>（最小可用内存）估算。</li>
+<li>所需数据可能已缓存在内存中，避免磁盘I&#x2F;O，但这一点在代价估算中难以准确考虑。</li>
+</ul>
+<h3 id="2-4-数据库系统内部I-O流程"><a href="#2-4-数据库系统内部I-O流程" class="headerlink" title="2.4 数据库系统内部I&#x2F;O流程"></a>2.4 数据库系统内部I&#x2F;O流程</h3><ul>
+<li><strong>逻辑读写</strong>：由事务发起（如<code>read(x)</code>, <code>write(y)</code>）。</li>
+<li><strong>物理读写</strong>：<ul>
+<li><code>input(X)</code>：将包含数据项X的磁盘页读入缓冲区。</li>
+<li><code>output(Y)</code>：将修改后的缓冲区页写回磁盘。</li>
+</ul>
+</li>
+<li><strong>缓冲区管理</strong>：采用LRU等策略进行页替换。</li>
+</ul>
+<h2 id="三、选择操作（Selection）的实现算法"><a href="#三、选择操作（Selection）的实现算法" class="headerlink" title="三、选择操作（Selection）的实现算法"></a>三、选择操作（Selection）的实现算法</h2><h3 id="3-1-基本概念与查询条件类型"><a href="#3-1-基本概念与查询条件类型" class="headerlink" title="3.1 基本概念与查询条件类型"></a>3.1 基本概念与查询条件类型</h3><ul>
+<li><strong>选择操作</strong>：从关系<code>r</code>中检索满足条件的记录。</li>
+<li><strong>查询条件类型</strong>：<ol>
+<li><strong>等值条件</strong>（如<code>salary = 100</code>）</li>
+<li><strong>范围条件</strong>（如<code>salary BETWEEN 50 AND 400</code>）</li>
+<li><strong>比较条件</strong>（如<code>salary &gt; 300</code>），可视为范围查询的特例。</li>
+</ol>
+</li>
+</ul>
+<h3 id="3-2-算法分类"><a href="#3-2-算法分类" class="headerlink" title="3.2 算法分类"></a>3.2 算法分类</h3><ul>
+<li><strong>A1：线性扫描（文件扫描）</strong></li>
+<li><strong>A2-A4：使用索引的选择</strong>（等值条件）</li>
+<li><strong>A5-A6：涉及比较的选择</strong>（范围条件）</li>
+<li><strong>A7-A10：复杂选择</strong>（合取、析取、否定）</li>
+</ul>
+<h3 id="3-3-各算法详解"><a href="#3-3-各算法详解" class="headerlink" title="3.3 各算法详解"></a>3.3 各算法详解</h3><h4 id="A1：线性扫描"><a href="#A1：线性扫描" class="headerlink" title="A1：线性扫描"></a><strong>A1：线性扫描</strong></h4><ul>
+<li>扫描关系的每一个块，测试所有记录。</li>
+<li><strong>代价</strong>：<code>b_r</code>次块传输 + 1次寻道。<ul>
+<li>若选择基于<strong>主键属性</strong>的等值条件，找到即可停止，平均代价为<code>(b_r/2)</code>次块传输 + 1次寻道。</li>
+</ul>
+</li>
+<li><strong>适用性</strong>：适用于任何条件，无论记录顺序、有无索引。特别适合<strong>堆文件</strong>或对非索引属性的扫描。</li>
+</ul>
+<h4 id="A2：使用主索引（聚簇索引）的等值查询（针对键属性）"><a href="#A2：使用主索引（聚簇索引）的等值查询（针对键属性）" class="headerlink" title="A2：使用主索引（聚簇索引）的等值查询（针对键属性）"></a><strong>A2：使用主索引（聚簇索引）的等值查询（针对键属性）</strong></h4><ul>
+<li>利用B+树主索引检索<strong>单个记录</strong>（如<code>ID=45565</code>）。</li>
+<li><strong>代价</strong>：<code>(h_i + 1) * (t_T + t_S)</code>，其中<code>h_i</code>为树高。</li>
+</ul>
+<h4 id="A3：使用主索引的等值查询（针对非键属性）"><a href="#A3：使用主索引的等值查询（针对非键属性）" class="headerlink" title="A3：使用主索引的等值查询（针对非键属性）"></a><strong>A3：使用主索引的等值查询（针对非键属性）</strong></h4><ul>
+<li>检索<strong>多个记录</strong>（如<code>branch_name=&#39;Perryridge&#39;</code>），这些记录物理上连续存储。</li>
+<li><strong>代价</strong>：<code>h_i * (t_T + t_S) + t_S + t_T * b</code>，其中<code>b</code>为包含匹配记录的块数。</li>
+</ul>
+<h4 id="A4：使用辅助索引的等值查询"><a href="#A4：使用辅助索引的等值查询" class="headerlink" title="A4：使用辅助索引的等值查询"></a><strong>A4：使用辅助索引的等值查询</strong></h4><ol>
+<li><strong>针对键属性</strong>：检索单个记录，代价同A2。</li>
+<li><strong>针对非键属性</strong>：检索<code>n</code>个记录，每个记录可能位于不同块。<ul>
+<li><strong>代价</strong>：<code>(h_i + n) * (t_T + t_S)</code>，最坏情况下每个记录需一次I&#x2F;O。</li>
+</ul>
+</li>
+</ol>
+<h4 id="A5：使用主索引的比较查询（范围查询）"><a href="#A5：使用主索引的比较查询（范围查询）" class="headerlink" title="A5：使用主索引的比较查询（范围查询）"></a><strong>A5：使用主索引的比较查询（范围查询）</strong></h4><ul>
+<li>关系已按属性A排序（聚簇索引）。</li>
+<li>对于<code>σ_A ≥ V(r)</code>：用索引找到第一个≥V的元组，然后顺序扫描。</li>
+<li>对于<code>σ_A ≤ V(r)</code>：直接顺序扫描至第一个&gt;V的元组，不使用索引。</li>
+<li><strong>代价</strong>：<code>h_i * (t_T + t_S) + t_S + t_T * b</code>，b为匹配记录所占块数。</li>
+</ul>
+<h4 id="A6：使用辅助索引的比较查询"><a href="#A6：使用辅助索引的比较查询" class="headerlink" title="A6：使用辅助索引的比较查询"></a><strong>A6：使用辅助索引的比较查询</strong></h4><ul>
+<li>对于<code>σ_A ≥ V(r)</code>：用索引找到第一个≥V的索引项，然后顺序扫描索引叶节点获取记录指针。</li>
+<li>对于<code>σ_A ≤ V(r)</code>：扫描索引叶节点直至第一个&gt;V的项，获取指针。</li>
+<li><strong>代价</strong>：<code>(h_i + n) * (t_T + t_S)</code>，每个匹配记录可能需一次I&#x2F;O。</li>
+<li><strong>注意</strong>：当<code>n</code>较大时，线性扫描可能更便宜。</li>
+</ul>
+<h3 id="3-4-复杂选择的实现"><a href="#3-4-复杂选择的实现" class="headerlink" title="3.4 复杂选择的实现"></a>3.4 复杂选择的实现</h3><h4 id="合取选择（AND条件）"><a href="#合取选择（AND条件）" class="headerlink" title="合取选择（AND条件）"></a><strong>合取选择（AND条件）</strong></h4><ul>
+<li><strong>A7：使用一个索引</strong><ol>
+<li>选择一个代价最低的条件<code>θ_i</code>，用索引检索满足该条件的元组。</li>
+<li>在内存缓冲区中检查这些元组是否满足其余条件。</li>
+</ol>
+</li>
+<li><strong>A8：使用复合索引</strong><ul>
+<li>若有合适的多属性索引，直接使用。</li>
+</ul>
+</li>
+<li><strong>A9：标识符交集法</strong><ul>
+<li>对每个有条件索引的条件，分别获取记录指针集，然后取交集。</li>
+<li>对无索引的条件，在内存中测试。</li>
+</ul>
+</li>
+</ul>
+<h4 id="析取选择（OR条件）"><a href="#析取选择（OR条件）" class="headerlink" title="析取选择（OR条件）"></a><strong>析取选择（OR条件）</strong></h4><ul>
+<li><strong>A10：标识符并集法</strong><ul>
+<li>若所有条件都有可用索引，分别获取指针集后取并集。</li>
+<li>否则，退化为线性扫描。</li>
+</ul>
+</li>
+</ul>
+<h4 id="否定选择（NOT条件）"><a href="#否定选择（NOT条件）" class="headerlink" title="否定选择（NOT条件）"></a><strong>否定选择（NOT条件）</strong></h4><ul>
+<li>通常使用线性扫描。</li>
+<li>若满足否定的记录很少，且原条件<code>θ</code>有索引，可先通过索引找到满足<code>θ</code>的记录，再从文件中排除它们。</li>
+</ul>
+<h2 id="四、排序"><a href="#四、排序" class="headerlink" title="四、排序"></a>四、排序</h2><h3 id="4-1-排序的重要性"><a href="#4-1-排序的重要性" class="headerlink" title="4.1 排序的重要性"></a>4.1 排序的重要性</h3><ul>
+<li>用于<code>ORDER BY</code>、<code>DISTINCT</code>、<code>GROUP BY</code>等子句。</li>
+<li>连接操作前对关系排序可大幅提升效率（如归并连接）。</li>
+<li>物理排序后可以建立有序索引（如B+树）。</li>
+</ul>
+<h3 id="4-2-外部排序算法（当数据量大于内存）"><a href="#4-2-外部排序算法（当数据量大于内存）" class="headerlink" title="4.2 外部排序算法（当数据量大于内存）"></a>4.2 外部排序算法（当数据量大于内存）</h3><ol>
+<li><p><strong>生成初始有序段</strong></p>
+<ul>
+<li>重复将M个块读入内存，排序后写回磁盘，形成有序段（Run）<code>R_i</code>。</li>
+<li>设最终生成N个有序段。</li>
+</ul>
+</li>
+<li><p><strong>归并有序段</strong></p>
+<ul>
+<li>使用多路归并，将多个有序段合并为更大的有序段，直至整个关系有序。</li>
+<li>归并的趟数约为<code>⌈log_{M-1}(N)⌉</code>。</li>
+</ul>
+</li>
+</ol>
+<h2 id="五、表达式求值"><a href="#五、表达式求值" class="headerlink" title="五、表达式求值"></a>五、表达式求值</h2><h3 id="5-1-两种基本策略"><a href="#5-1-两种基本策略" class="headerlink" title="5.1 两种基本策略"></a>5.1 两种基本策略</h3><ul>
+<li><p><strong>物化</strong>：</p>
+<ul>
+<li>逐步计算子表达式，将<strong>中间结果临时存储到磁盘</strong>，再作为输入进行下一步计算。</li>
+<li>优点：实现简单。</li>
+<li>缺点：产生额外的I&#x2F;O开销。</li>
+</ul>
+</li>
+<li><p><strong>流水线</strong>：</p>
+<ul>
+<li>多个操作<strong>同时执行</strong>，一个操作产生的元组<strong>立即传递</strong>给下一个操作，无需物化中间结果。</li>
+<li>优点：极大减少I&#x2F;O，提升效率。</li>
+<li>示例：对于<code>Π_salary(σ_salary&lt;2500(instructor))</code>，选择操作一边输出元组，投影操作一边处理，无需等待全部选择完成。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-2-流水线执行的原理"><a href="#5-2-流水线执行的原理" class="headerlink" title="5.2 流水线执行的原理"></a>5.2 流水线执行的原理</h3><ul>
+<li>在内存中设立缓冲区，操作之间通过缓冲区传递数据。</li>
+<li>可实现一定程度的并行，充分利用CPU和I&#x2F;O资源。</li>
+</ul>
+<h2 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h2><ul>
+<li>查询处理是将高级查询转换为高效物理执行计划的过程。</li>
+<li><strong>代价估算</strong>的核心是磁盘I&#x2F;O（块传输和寻道）。</li>
+<li><strong>选择操作</strong>的实现算法多样，需根据索引、条件类型和数据分布选择最优策略。</li>
+<li><strong>排序</strong>是许多操作的基础，外部排序算法用于处理大数据集。</li>
+<li><strong>表达式求值</strong>可采用物化或流水线策略，流水线能显著减少中间I&#x2F;O。</li>
+</ul>
+<p>通过深入理解这些原理和算法，数据库系统设计者和开发者能够编写更高效的查询，并更好地进行系统调优。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src="/img/my_avatar.png" title="头像" alt="头像"><img class="post-copyright__author_img_front" src="/img/my_avatar.png" title="头像" alt="头像"></a><div class="post-copyright__author_name">Yuejin Wu</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2025/12/28/DB_QueryProcessing/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2025/12/28/DB_QueryProcessing/')">§15 Query Processing 简读</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2025/12/28/DB_QueryProcessing/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=§15 Query Processing 简读&amp;url=http://example.com/2025/12/28/DB_QueryProcessing/&amp;pic=/img/C7_cover.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Yuejin's Blog</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>数据库<span class="categoryesPageCount">10</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/Database/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>Database<span class="tagsPageCount">10</span></a></div></div><div class="post_share"><div class="social-share" data-image="/img/C7_cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2025/12/27/DB_Indexing/"><img class="prev-cover" src="/img/C7_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">§14 Indexing 解读</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2025/12/24/DB_AdvancedSQL/" title="§5 Advanced-SQL课件详解"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">§5 Advanced-SQL课件详解</div></div></a></div><div><a href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img class="cover" src="/img/C7_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-27</div><div class="title">§14 Indexing 解读</div></div></a></div><div><a href="/2025/12/26/DB_E-R%20Model/" title="§6 E-R Model 解读"><img class="cover" src="/img/ER_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-26</div><div class="title">§6 E-R Model 解读</div></div></a></div><div><a href="/2025/12/22/DB_%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B%E7%AE%80%E8%AF%BB/" title="§2 关系模型 简读"><img class="cover" src="/img/db_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-22</div><div class="title">§2 关系模型 简读</div></div></a></div><div><a href="/2025/12/24/DB_%E9%AB%98%E7%BA%A7SQL%E7%AE%80%E8%AF%BB/" title="高级SQL 简读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-24</div><div class="title">高级SQL 简读</div></div></a></div><div><a href="/2025/12/22/DB_SQL%20%E8%AF%AD%E8%A8%80%E7%AE%80%E8%AF%BB/" title="§3 Intro-to-SQL 简读"><img class="cover" src="/img/SQL_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-12-22</div><div class="title">§3 Intro-to-SQL 简读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src="/img/my_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"><div class="author-intro" style="line-height: 1.7; text-align: center; font-family: inherit; margin-top: -0.5rem; margin-bottom: 0.5rem;">
+  <p style="font-size: 1.15rem; margin-bottom: 0.8rem; font-weight: 500; color: var(--anzhiyu-fontcolor);">你好，我是 <span style="color: #00ffcc; font-weight: 600; text-shadow: 0 0 5px #00ffccaa;">Yuejin Wu</span>！👋</p>
+  <p style="font-size: 1.05rem; margin-bottom: 0.6rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">BUPT 本科生 · 人工智能专业</p>
+  <p style="font-size: 1.05rem; margin-bottom: 1rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">记录学习、思考与生活</p>
+  <p style="font-size: 1.1rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--anzhiyu-theme-op); font-weight: 600; color: #FF0066; text-shadow: 0 0 5px #FF0066, 0 0 5px #FF0066aa;">
+   保持好奇，持续探索
+  </p>
+</div>
+</div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">Yuejin Wu</h1><div class="author-info__desc"></div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/YuejinWu/YuejinWu.github.io" target="_blank" title="Github"></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">数据库查询处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">一、查询处理概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E7%9A%84%E5%AE%9A%E4%B9%89%E4%B8%8E%E7%9B%AE%E6%A0%87"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 查询处理的定义与目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E7%9A%84%E4%B8%89%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 查询处理的三个阶段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%9F%A5%E8%AF%A2%E4%BB%A3%E4%BB%B7%E7%9A%84%E5%BA%A6%E9%87%8F"><span class="toc-number">3.</span> <span class="toc-text">二、查询代价的度量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%BB%A3%E4%BB%B7%E7%9A%84%E4%B8%BB%E8%A6%81%E6%9E%84%E6%88%90"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 代价的主要构成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%A3%81%E7%9B%98%E8%AE%BF%E9%97%AE%E4%BB%A3%E4%BB%B7%E7%9A%84%E7%BB%86%E5%88%86"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 磁盘访问代价的细分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%8E%B0%E5%AE%9E%E8%80%83%E8%99%91%E4%B8%8E%E7%BC%93%E5%86%B2"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 现实考虑与缓冲</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E5%86%85%E9%83%A8I-O%E6%B5%81%E7%A8%8B"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 数据库系统内部I&#x2F;O流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%80%89%E6%8B%A9%E6%93%8D%E4%BD%9C%EF%BC%88Selection%EF%BC%89%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%AE%97%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">三、选择操作（Selection）的实现算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%9F%A5%E8%AF%A2%E6%9D%A1%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 基本概念与查询条件类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 算法分类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%90%84%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 各算法详解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#A1%EF%BC%9A%E7%BA%BF%E6%80%A7%E6%89%AB%E6%8F%8F"><span class="toc-number">4.3.1.</span> <span class="toc-text">A1：线性扫描</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#A2%EF%BC%9A%E4%BD%BF%E7%94%A8%E4%B8%BB%E7%B4%A2%E5%BC%95%EF%BC%88%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%EF%BC%89%E7%9A%84%E7%AD%89%E5%80%BC%E6%9F%A5%E8%AF%A2%EF%BC%88%E9%92%88%E5%AF%B9%E9%94%AE%E5%B1%9E%E6%80%A7%EF%BC%89"><span class="toc-number">4.3.2.</span> <span class="toc-text">A2：使用主索引（聚簇索引）的等值查询（针对键属性）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#A3%EF%BC%9A%E4%BD%BF%E7%94%A8%E4%B8%BB%E7%B4%A2%E5%BC%95%E7%9A%84%E7%AD%89%E5%80%BC%E6%9F%A5%E8%AF%A2%EF%BC%88%E9%92%88%E5%AF%B9%E9%9D%9E%E9%94%AE%E5%B1%9E%E6%80%A7%EF%BC%89"><span class="toc-number">4.3.3.</span> <span class="toc-text">A3：使用主索引的等值查询（针对非键属性）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#A4%EF%BC%9A%E4%BD%BF%E7%94%A8%E8%BE%85%E5%8A%A9%E7%B4%A2%E5%BC%95%E7%9A%84%E7%AD%89%E5%80%BC%E6%9F%A5%E8%AF%A2"><span class="toc-number">4.3.4.</span> <span class="toc-text">A4：使用辅助索引的等值查询</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#A5%EF%BC%9A%E4%BD%BF%E7%94%A8%E4%B8%BB%E7%B4%A2%E5%BC%95%E7%9A%84%E6%AF%94%E8%BE%83%E6%9F%A5%E8%AF%A2%EF%BC%88%E8%8C%83%E5%9B%B4%E6%9F%A5%E8%AF%A2%EF%BC%89"><span class="toc-number">4.3.5.</span> <span class="toc-text">A5：使用主索引的比较查询（范围查询）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#A6%EF%BC%9A%E4%BD%BF%E7%94%A8%E8%BE%85%E5%8A%A9%E7%B4%A2%E5%BC%95%E7%9A%84%E6%AF%94%E8%BE%83%E6%9F%A5%E8%AF%A2"><span class="toc-number">4.3.6.</span> <span class="toc-text">A6：使用辅助索引的比较查询</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E5%A4%8D%E6%9D%82%E9%80%89%E6%8B%A9%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.4.</span> <span class="toc-text">3.4 复杂选择的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%88%E5%8F%96%E9%80%89%E6%8B%A9%EF%BC%88AND%E6%9D%A1%E4%BB%B6%EF%BC%89"><span class="toc-number">4.4.1.</span> <span class="toc-text">合取选择（AND条件）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9E%90%E5%8F%96%E9%80%89%E6%8B%A9%EF%BC%88OR%E6%9D%A1%E4%BB%B6%EF%BC%89"><span class="toc-number">4.4.2.</span> <span class="toc-text">析取选择（OR条件）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%A6%E5%AE%9A%E9%80%89%E6%8B%A9%EF%BC%88NOT%E6%9D%A1%E4%BB%B6%EF%BC%89"><span class="toc-number">4.4.3.</span> <span class="toc-text">否定选择（NOT条件）</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%8E%92%E5%BA%8F"><span class="toc-number">5.</span> <span class="toc-text">四、排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%8E%92%E5%BA%8F%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 排序的重要性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%EF%BC%88%E5%BD%93%E6%95%B0%E6%8D%AE%E9%87%8F%E5%A4%A7%E4%BA%8E%E5%86%85%E5%AD%98%EF%BC%89"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 外部排序算法（当数据量大于内存）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC"><span class="toc-number">6.</span> <span class="toc-text">五、表达式求值</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E4%B8%A4%E7%A7%8D%E5%9F%BA%E6%9C%AC%E7%AD%96%E7%95%A5"><span class="toc-number">6.1.</span> <span class="toc-text">5.1 两种基本策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E6%B5%81%E6%B0%B4%E7%BA%BF%E6%89%A7%E8%A1%8C%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">6.2.</span> <span class="toc-text">5.2 流水线执行的原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">六、总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§15 Query Processing 简读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读">§15 Query Processing 简读</a><time datetime="2025-12-27T16:13:06.413Z" title="发表于 2025-12-28 00:13:06">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§14 Indexing 解读"/></a><div class="content"><a class="title" href="/2025/12/27/DB_Indexing/" title="§14 Indexing 解读">§14 Indexing 解读</a><time datetime="2025-12-27T13:25:49.244Z" title="发表于 2025-12-27 21:25:49">2025-12-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/" title="§13 Data Storage Structures 简读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§13 Data Storage Structures 简读"/></a><div class="content"><a class="title" href="/2025/12/27/DB_%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84/" title="§13 Data Storage Structures 简读">§13 Data Storage Structures 简读</a><time datetime="2025-12-27T08:01:17.698Z" title="发表于 2025-12-27 16:01:17">2025-12-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/26/DB_E-R%20Model/" title="§6 E-R Model 解读"><img src="/img/ER_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§6 E-R Model 解读"/></a><div class="content"><a class="title" href="/2025/12/26/DB_E-R%20Model/" title="§6 E-R Model 解读">§6 E-R Model 解读</a><time datetime="2025-12-26T15:42:18.863Z" title="发表于 2025-12-26 23:42:18">2025-12-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/26/DB_Schema%20Normalization-Relational%20Database%20Design/" title="§7 Schema Normalization-Relational Database Design 解读"><img src="/img/SN_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§7 Schema Normalization-Relational Database Design 解读"/></a><div class="content"><a class="title" href="/2025/12/26/DB_Schema%20Normalization-Relational%20Database%20Design/" title="§7 Schema Normalization-Relational Database Design 解读">§7 Schema Normalization-Relational Database Design 解读</a><time datetime="2025-12-26T14:25:50.639Z" title="发表于 2025-12-26 22:25:50">2025-12-26</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2025 By <a class="footer-bar-link" href="/" title="Yuejin Wu" target="_blank">Yuejin Wu</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" href="/" title="首页">首页</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">8</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 0.88rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 0.88rem;">Database<sup>10</sup></a><a href="/tags/English/" style="font-size: 0.88rem;">English<sup>1</sup></a><a href="/tags/RNN/" style="font-size: 0.88rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 0.88rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 0.88rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 0.88rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 0.88rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 0.88rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.7.0",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 Yuejin Wu 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://cdn.cbd.int/qrcodejs@1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
