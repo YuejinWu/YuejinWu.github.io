@@ -1,0 +1,813 @@
+<!DOCTYPE html><html lang="en &amp;&amp; zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>§6 同步原语 解读 | Yuejin's Blog</title><meta name="keywords" content="OS"><meta name="author" content="Yuejin Wu"><meta name="copyright" content="Yuejin Wu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="§6 同步原语 解读"><meta name="application-name" content="§6 同步原语 解读"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="§6 同步原语 解读"><meta property="og:url" content="http://example.com/2026/01/02/OS_/index.html"><meta property="og:site_name" content="Yuejin's Blog"><meta property="og:description" content="操作系统同步原语：从竞争条件到管程与经典问题 第一章：竞争条件与互斥基础 1.1 跨线程通信与共享内存模型 在多线程环境中，线程间通信的基本模型是通过共享地址空间。一个典型范例是使用一个共享的、有界的缓冲区：  线程1（发送者&amp;#x2F;生产者） 向缓冲区写入数据。 线程2（接收者&amp;#x2F;消费者） 从缓冲区读取数据"><meta property="og:locale" content="en &amp;&amp; zh-Hans"><meta property="og:image" content="http://example.com/img/OS_cover.png"><meta property="article:author" content="Yuejin Wu"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="http://example.com/img/OS_cover.png"><meta name="description" content="操作系统同步原语：从竞争条件到管程与经典问题 第一章：竞争条件与互斥基础 1.1 跨线程通信与共享内存模型 在多线程环境中，线程间通信的基本模型是通过共享地址空间。一个典型范例是使用一个共享的、有界的缓冲区：  线程1（发送者&amp;#x2F;生产者） 向缓冲区写入数据。 线程2（接收者&amp;#x2F;消费者） 从缓冲区读取数据"><link rel="shortcut icon" href="/img/mylogo.jpg"><link rel="canonical" href="http://example.com/2026/01/02/OS_/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: {"enable":true,"ck":null,"LingQueMonitorID":null},
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: Yuejin Wu","link":"链接: ","source":"来源: Yuejin's Blog","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.2.0/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.2.0/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'Yuejin's Blog',
+  title: '§6 同步原语 解读',
+  postAI: '',
+  pageFillDescription: '操作系统同步原语：从竞争条件到管程与经典问题, 第一章：竞争条件与互斥基础, 1.1 跨线程通信与共享内存模型, 1.2 竞争条件：定义、成因与危害, 1.3 临界区与互斥原则, 1.4 锁：实现互斥的基本机制, 1.5 硬件原子指令支持, 第二章：信号量, 2.1 从互斥到同步, 2.2 轮询的低效与 sleep/wakeup 原语, 2.3 信号量的概念与迪杰斯特拉的原语, 2.4 信号量的两种定义与实现, 2.5 使用信号量解决生产者-消费者问题, 2.6 对锁实现的改进, 第三章：管程与条件变量, 3.1 信号量的局限性与管程的引入, 3.2 管程的概念与特性, 3.3 条件变量：解决管程内的同步问题, 3.4 管程的语义：Hoare vs. MESA, 3.5 使用管程与条件变量解决生产者-消费者问题, 3.6 读者-写者问题, 3.7 并发程序中的常见错误类型, 第四章：经典同步问题剖析, 4.1 哲学家就餐问题, 问题描述, 错误方案分析, 基于状态检查的信号量方案, 更简单的无死锁方案, 4.2 理发师睡眠问题, 问题描述, 信号量解决方案, 第五章：总结, 5.1 同步原语对比, 5.2 核心问题解决模式回顾, 5.3 并发编程的挑战操作系统同步原语从竞争条件到管程与经典问题第一章竞争条件与互斥基础跨线程通信与共享内存模型在多线程环境中线程间通信的基本模型是通过共享地址空间一个典型范例是使用一个共享的有界的缓冲区线程发送者生产者向缓冲区写入数据线程接收者消费者从缓冲区读取数据操作系统为此类通信提供的基本接口可能是如果缓冲区有空间则插入消息否则阻塞调用线程直至空间可用如果缓冲区有消息则返回一条消息否则阻塞调用线程直至有消息可用此模型实例化了经典的生产者消费者问题竞争条件定义成因与危害竞争条件指程序的输出或结果依赖于多个并发线程执行指令的相对时序或交错顺序核心成因当多个线程在没有适当同步的情况下并发地对同一个共享变量执行读取修改写入的多步非原子操作时详细示例假设两个发送者线程和并发执行初始为该高级语言操作通常对应多条机器指令将的值加载到寄存器值加将的值存回可能的错误交错执行顺序时间轴结果尽管两个线程都执行了加操作最终的值是而不是危害特性竞争条件引发的错误往往难以重现和调试因为它依赖于极罕见且不确定的线程调度时机临界区与互斥原则为了解决竞争条件我们引入临界区的概念临界区定义访问共享资源变量数据结构等的那段代码区域必须保证其执行具有原子性互斥访问四原则为正确实现临界区访问提供理论框架空闲让进当没有线程处于临界区内时应立即允许一个请求进入的线程进入忙则等待如果已有线程在临界区内其他所有试图进入的线程必须在外面等待让权等待等待进入临界区的线程应主动释放进入阻塞态避免忙等待自旋浪费处理器资源有限等待对任何一个提出进入请求的线程其等待时间必须是有限的避免饥饿锁实现互斥的基本机制锁或称互斥锁是一个共享变量用作协调其他共享资源访问的标志两个基本原子操作尝试获取锁若锁已被其他线程持有则调用线程等待释放锁使其他等待线程有机会获取核心作用通过用和操作包裹任意复杂的临界区代码在逻辑上将其转换为一个原子操作早期有缺陷的实现尝试例如表示表示忙等待标记为已锁问题分析操作本身包含对锁变量的检查设置多步操作这又是一个临界区两个线程可能同时检查到锁为然后都将其设置为从而同时进入临界区违反了互斥原则硬件原子指令支持要打破实现锁需要原子操作而原子操作又需要锁来实现的循环必须依赖硬件提供的原子指令测试与设置假设指向布尔值获取旧值无条件设置为上锁返回旧值硬件保证总线仲裁器确保读和写在一个不可分割的总线周期内完成基于的正确锁实现如果返回旧值为已锁则自旋等待单一存储指令本身是原子的工作流程原子地返回锁的旧状态并同时将其上锁如果返回的是则调用线程成功获取锁如果返回的是则说明锁已被占用线程自旋等待比较并交换交换成功交换失败基于的锁实现期望是才交换为关于禁用中断的讨论在单系统中在临界区内禁用定时器中断可以防止线程被切换从而实现原子性局限性不适用于多多核系统禁用当前的中断无法阻止其他上的线程进入同一临界区安全风险将禁用中断的权限交给用户线程是危险的恶意或错误的用户线程可能禁用中断后不再启用导致系统失去调度能力而崩溃结论禁用中断通常仅作为操作系统内核在特定场景下实现低级同步的一种手段并非通用的用户级解决方案第二章信号量从互斥到同步互斥锁解决了竞争条件问题但并发编程中还有另一类问题同步同步定义涉及两个或多个通信线程一个线程需要等待另一个线程完成某项工作或达到某个状态条件为真后才能继续执行经典问题生产者消费者问题生产者不能在缓冲区满时写入消费者不能在缓冲区空时读取线程间需要协调条件何时成立轮询的低效与原语初始的朴素解决方案轮询忙等待生产者缓冲区满空转等待消费者缓冲区空空转等待缺陷持续占用进行无意义的循环检查效率极低改进思路引入和原语将调用线程的状态从运行态改为阻塞态使其让出将指定线程的状态从阻塞态改为就绪态使其有机会被调度执行初步使用的实现存在缺陷消费者片段先释放锁然后睡眠被唤醒后重新获取锁唤醒丢失问题在消费者执行完后调用前的这个时间窗口内生产者可能已经向缓冲区添加了消息并调用了由于此时消费者尚未睡眠这次唤醒信号就丢失了随后消费者调用并可能永远无法被唤醒根源和不是原子操作解决思路需要将释放锁和进入睡眠设计为一个不可分割的原子操作这直接引出了信号量的设计信号量的概念与迪杰斯特拉的原语艾兹格迪杰斯特拉于年提出信号量及其两个原子操作和荷兰语缩写为便于理解常称为或核心思想信号量维护一个资源计数器并关联一个等待队列类比餐厅经理管理空闲餐桌数客人到来有空桌则计数减一并入座无空桌则排队等待客人离开计数加一并唤醒一个等待的客人入座信号量的两种定义与实现定义一非负整数信号量信号量是一个非负整数如果则否则调用线程等待直到另一个线程执行后再次尝试并唤醒所有正在等待该信号量的线程问题唤醒所有线程可能低效且被唤醒的线程仍需竞争资源定义二允许负值的信号量更常用信号量可为任意整数物理意义表示可用资源的数量表示无可用资源且无线程等待其绝对值表示正在等待该资源的线程数量操作语义原子地执行如果结果则将当前线程状态改为并加入该信号量的等待队列原子地执行如果结果说明有线程在等待则从其等待队列中移除一个线程将其状态改为并加入就绪队列信号量的伪代码实现基于定义二对应进入临界区保证原子性说明有线程在等待从等待队列取出一个线程放入就绪队列对应资源不足需要等待阻塞当前线程注意是实现原子操作的一种简化方式在实际操作系统中可能采用更复杂的锁或硬件原子指令来保护信号量内部数据结构二元信号量信号量的值只能为或可以完全替代互斥锁自旋锁的功能且避免了忙等待对应对应使用信号量解决生产者消费者问题为大小为的缓冲区设置三个信号量二元信号量初始为用于保证对缓冲区的互斥访问解决竞争条件计数信号量初始为表示空闲缓冲区单元数量计数信号量初始为表示已占用的缓冲区单元数量方案错误方案可能导致死锁生产者获取缓冲区访问权申请一个空闲单元增加一个已占用单元释放缓冲区访问权消费者获取缓冲区访问权申请一个已有数据的单元增加一个空闲单元释放缓冲区访问权死锁场景分析假设缓冲区已满生产者执行步骤成功获取执行步骤时由于生产者被阻塞在的等待队列中此时生产者仍持有消费者试图执行第一步就会因为被生产者持有而阻塞双方互相等待形成死锁方案正确方案调整操作的顺序先对资源信号量操作再对互斥信号量操作生产者先申请资源空闲单元再获取互斥锁释放互斥锁释放资源增加已占用单元消费者先申请资源有数据的单元再获取互斥锁释放互斥锁释放资源增加空闲单元正确性解释生产者在持有之前先申请如果缓冲区满生产者会在上阻塞而不会持有此时消费者可以正常获取并消费消费后会执行唤醒阻塞的生产者这避免了死锁对锁实现的改进基于的自旋锁在锁被长期持有时会浪费大量周期更优的实现是当发现锁已被持有时将当前线程状态设置为并加入该锁的等待队列然后让出当锁被释放时再从等待队列中唤醒一个线程需要维护的数据结构等待线程列表当前持有锁的线程挑战在实现和逻辑时仍需仔细处理竞争条件确保正确性这通常在操作系统内核或运行时系统的底层实现中完成如实验的要求第三章管程与条件变量信号量的局限性与管程的引入尽管信号量功能强大但正确使用它编写程序是困难的和的调用顺序非常微妙容易出错难以避免竞争条件和死锁需求能否由编译器或编程语言提供更高级的抽象自动生成正确的同步代码管程应运而生管程的概念与特性管程是一种高级同步构造可视为一个特殊的对象或模块封装性管程内部的共享数据只能通过其声明的入口方法进行访问对外部隐藏实现细节互斥性每个管程关联一个互斥锁任何线程在调用管程的入口方法时必须首先获取该互斥锁因此任何时刻最多只有一个线程能在管程内部处于活动状态即执行入口方法结构示意管程互斥锁共享数据条件变量入口方法入口方法入口队列等待获取管程锁的线程条件变量解决管程内的同步问题互斥锁保证了管程内一次只有一个线程但如果这个线程发现运行条件不满足如缓冲区空满它需要等待如果它在管程内直接调用类似的操作会因为它持有管程锁而导致其他线程永远无法进入管程来改变条件并唤醒它造成永久阻塞条件变量是管程内部用于解决线程同步问题的机制本质一个等待队列关联一个等待条件三个核心原子操作调用此操作的线程释放管程锁离开管程并阻塞自己进入该条件变量的等待队列唤醒在该条件变量等待队列中的一个线程被唤醒的线程将在将来某个时刻重新获取管程锁后从调用之后继续执行唤醒在该条件变量等待队列中的所有线程关键特性操作原子地完成了释放锁和进入睡眠这两个动作彻底解决了之前提到的唤醒丢失问题条件变量的伪代码实现以风格为例原子地释放管程锁加入等待队列阻塞自身被唤醒后重新获取管程锁此步骤在唤醒后执行从队列头部取出一个线程放入就绪队列唤醒所有等待线程管程的语义当管程内的线程执行唤醒等待线程时应该立即让执行还是让继续执行这引出了两种管程语义语义由提出规则发出的线程立即离开管程并等待通常进入一个紧急队列被唤醒的线程立即进入管程执行优点线程被唤醒时可以确保它所等待的条件仍然成立因为在发出信号后没有机会改变条件缺点实现复杂需要额外的上下文切换线程需要被保存状态并在退出管程后被重新调度执行语义块和采用此语义规则发出的线程继续执行直到退出管程被唤醒的线程被移到管程的入口队列中需要与其他线程竞争管程锁优点实现更简单上下文切换更少并发度可能更高严重缺点线程被唤醒后到它最终获得锁并重新进入管程的这段时间内条件可能被其他线程改变而不再成立核心要求在语义下绝对不能使用语句检查条件必须使用循环被唤醒的线程在重新获得锁后必须再次检查条件是否成立如果不成立则再次调用语义下正确的模式必须用执行条件成立后的操作使用管程与条件变量解决生产者消费者问题共享数据条件变量对应缓冲区不满条件对应缓冲区不空条件入口方法语义使用唤醒一个可能等待的消费者语义使用唤醒一个可能等待的生产者与信号量方案的对比管程方案将互斥和资源计数的逻辑封装在了一起通过条件变量来表达同步关系代码结构更清晰更接近于高级语言思维读者写者问题问题描述多个并发线程共享一个资源如文件数据库线程分为两类读者只读取资源不修改写者读取并修改资源核心要求允许多个读者同时访问读操作不互斥写者必须独占访问写操作与任何其他读写操作互斥三种常见变体读者优先只要有一个读者正在读后续所有读者都可以直接开始读写者必须等待所有读者包括新来的结束读写公平如使用读写锁读者和写者按照请求到达的顺序获得访问权写者等待时新读者不能插队写者优先如果一个写者在等待那么新到达的读者必须等待直到所有等待的写者完成使用信号量实现读者优先当前活跃的读者数量保护计数的互斥锁初值写锁控制写互斥及第一个读者最后一个读者初值第一个读者需要获取写锁阻止写者最后一个读者释放写锁允许写者进入写者直接获取写锁工作流程作为基本的互斥锁第一个读者获取最后一个读者释放它这保证了只要有读者在读写者就无法获取当读者数为零时写者才能获取锁进行写操作多个读者通过安全地更新计数并发程序中的常见错误类型原子性违反表现本应原子执行的一段代码临界区被并发线程交错执行示例两个线程同时执行导致结果错误修复使用互斥锁保护临界区顺序违反表现线程假设线程已经完成了某项操作如初始化但实际上可能尚未执行或未完成示例线程读取线程刚创建但尚未完全初始化的对象状态修复使用条件变量信号量或屏障等同步机制来明确强制操作顺序死锁表现一组线程彼此循环等待对方持有的资源导致所有线程都无法前进示例线程持有锁请求锁线程持有锁请求锁修复规定全局的一致的锁获取顺序使用超时机制避免嵌套持有多个锁使用死锁检测与恢复算法较复杂第四章经典同步问题剖析哲学家就餐问题问题描述位哲学家围坐圆桌每人面前一盘意面每两位哲学家之间有一根筷子共根哲学家行为循环思考拿起左右两根筷子吃饭放下筷子筷子是独占资源设计算法避免死锁和饥饿并尽可能提高并发度允许多人同时吃错误方案分析方案直接取筷拿左筷拿右筷问题死锁若所有哲学家同时拿起左筷则每人都在等待右筷而右筷被邻居持有形成循环等待方案全局互斥整个拿筷吃饭放筷过程串行化问题性能极差任何时候只有一位哲学家能吃饭完全丧失了并发性基于状态检查的信号量方案核心思想引入哲学家的状态仅当哲学家的左右邻居都不在状态时他才可以进入状态为每位哲学家设置一个信号量用于在无法吃饭时阻塞用一个互斥锁保护状态数组关键实现细节与修正初始有缺陷的问题在此处调用会持有睡眠这会导致死锁因为其他线程无法进入修改状态修正后版本避免持有锁睡眠语义用先释放锁然后在自己的信号量上阻塞被唤醒后重新获取锁准备再次检查条件检查左邻居是否能吃了实际上此时刚设为所以条件简化为检查左邻居的左右是否非更准确的实现是测试左邻居的左右是否都不是就是左邻居的右邻居类似地检查右邻居注解中的检查逻辑是此方案最复杂部分需要确保唤醒邻居时该邻居的左右确实都不在吃饭状态上述伪代码是简化示意完整实现需仔细处理边界条件更简单的无死锁方案通过破坏循环等待条件来预防死锁让至少一位哲学家以不同的顺序取筷子每根筷子一个信号量例如让第位哲学家编号先拿右筷再拿左筷先右后左先左后右原理所有哲学家都先左后右会形成循环等待每个都持有左等右让一位哲学家先右后左就打破了循环依赖链此方案简单有效且允许最多两位不相邻的哲学家同时吃饭理发师睡眠问题问题描述理发店有一位理发师一张理发椅和张等候椅理发师若无顾客则在理发椅上睡觉若有顾客则为其理发理完后查看等候椅若等候椅有顾客则请下一位来理发否则继续睡觉顾客进门后若理发师在睡觉则唤醒他并理发若理发师正忙则找空等候椅坐下等待若无空等候椅则离开信号量解决方案需要协调三类实体理发师顾客座位资源信号量与共享变量等待理发的顾客数也是唤醒理发师的信号理发师就绪信号顾客等待此信号开始理发保护共享变量空闲等候椅数量理发师线程等待顾客若无则阻塞睡觉离开一个等候椅顾客坐上理发椅告诉顾客理发师准备好了理发临界区但此刻只有理发师和当前顾客涉及顾客线程占用一个等候椅通知理发师有顾客若理发师在睡则唤醒等待理发师就绪顾客被理发理发结束离开没有空位离开理发店扩展控制输出顺序若需严格按照理发师开始理发顾客被理发理发师结束顾客离开的顺序打印日志需要额外的信号量进行同步例如第五章总结同步原语对比原语核心思想主要用途优点缺点锁互斥锁二进制标志实现互斥保护临界区解决原子性违反概念简单硬件支持高效仅解决互斥无法表达复杂同步条件信号量带计数的同步变量关联等待队列解决资源分配类同步问题如生产者消费者可同时实现互斥与同步功能强大灵活使用困难顺序易错易导致死锁条件变量与管程锁配合使用的等待队列在管程内部让线程等待特定条件成立与管程结合使用时代码清晰更面向对象必须与互斥锁结合使用不能单独使用管程封装了数据互斥锁和条件变量的高级抽象提供结构化易于维护的同步代码编写方式由语言编译器支持互斥程序员专注条件同步减少错误需要编程语言支持不同的语义影响编程模式等价性理论上锁信号量条件变量管程三者可以互相实现即它们具有同等的表达能力性能考量选择哪种原语取决于具体场景临界区大小竞争激烈程度等待时间长短例如短临界区可能适合自旋锁而长等待操作则适合使用会让出的信号量或条件变量核心问题解决模式回顾生产者消费者信号量方案使用进行资源计数保证互斥管程方案使用条件变量进行等待通知读者写者通过区分读者和写者利用计数器实现多读互斥写排他的语义读者优先方案通过第一个读者加写锁最后一个读者解读锁来实现哲学家就餐展示了如何通过破坏循环等待改变取筷顺序来简单避免死锁也展示了通过状态检查与信号量实现的更复杂但可能更公平的方案并发编程的挑战编写正确的并发程序本质上是困难的因为它要求程序员精确识别所有共享数据和临界区为所有临界区选择合适的同步机制锁信号量等正确管理同步机制的获取与释放顺序以避免死锁和顺序违反在性能并发度与正确性之间做出权衡如自旋等待阻塞睡眠这份讲义系统梳理了从底层硬件原子指令到高层管程抽象的完整知识链条并结合经典问题剖析了各类同步原语的应用与陷阱为理解和设计并发程序提供了坚实的概念基础与实践指南',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-01-02 19:13:21',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><style>
+  /* === 只添加半透明磨砂效果，不改变任何布局 === */
+  
+  /* 1. 导航栏内所有可点击元素添加磨砂背景 */
+  #nav a,
+  #nav button {
+    /* 保持原有布局，只添加背景效果 */
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    transition: backdrop-filter 0.3s ease !important;
+  }
+  
+  /* 2. 浅色模式：白色半透明 */
+  body:not([data-theme="dark"]) #nav a,
+  body:not([data-theme="dark"]) #nav button {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* 3. 深色模式：黑色半透明 */
+  [data-theme="dark"] #nav a,
+  [data-theme="dark"] #nav button {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* 4. 悬停效果：稍微增加透明度 */
+  #nav a:hover,
+  #nav button:hover {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  
+  body:not([data-theme="dark"]) #nav a:hover,
+  body:not([data-theme="dark"]) #nav button:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  [data-theme="dark"] #nav a:hover,
+  [data-theme="dark"] #nav button:hover {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+  }
+</style>
+<link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.1"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">Yuejin's Blog</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 1.05rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 1.05rem;">Database<sup>12</sup></a><a href="/tags/English/" style="font-size: 1.05rem;">English<sup>1</sup></a><a href="/tags/OS/" style="font-size: 1.05rem;">OS<sup>2</sup></a><a href="/tags/RNN/" style="font-size: 1.05rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 1.05rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 1.05rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 1.05rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 1.05rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 1.05rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/01/"><span class="card-archive-list-date">January 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/12/"><span class="card-archive-list-date">December 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">20</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url">操作系统</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/OS/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>OS</span></a></span></div></div><h1 class="post-title" itemprop="name headline">§6 同步原语 解读</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2026-01-02T08:03:54.502Z" title="发表于 2026-01-02 16:03:54">2026-01-02</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2026-01-02T11:13:21.404Z" title="更新于 2026-01-02 19:13:21">2026-01-02</time></span></div><div class="meta-secondline"><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为北京"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>北京</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="/img/OS_cover.png"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://example.com/2026/01/02/OS_/"><header><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url">操作系统</a><a href="/tags/OS/" tabindex="-1" itemprop="url">OS</a><h1 id="CrawlerTitle" itemprop="name headline">§6 同步原语 解读</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">Yuejin Wu</span><time itemprop="dateCreated datePublished" datetime="2026-01-02T08:03:54.502Z" title="发表于 2026-01-02 16:03:54">2026-01-02</time><time itemprop="dateCreated datePublished" datetime="2026-01-02T11:13:21.404Z" title="更新于 2026-01-02 19:13:21">2026-01-02</time></header><h3 id="操作系统同步原语：从竞争条件到管程与经典问题">操作系统同步原语：从竞争条件到管程与经典问题</h3>
+<h2 id="第一章：竞争条件与互斥基础">第一章：竞争条件与互斥基础</h2>
+<h3 id="1-1-跨线程通信与共享内存模型">1.1 跨线程通信与共享内存模型</h3>
+<p>在多线程环境中，线程间通信的基本模型是通过<strong>共享地址空间</strong>。一个典型范例是使用一个<strong>共享的、有界的缓冲区</strong>：</p>
+<ul>
+<li><strong>线程1（发送者/生产者）</strong> 向缓冲区写入数据。</li>
+<li><strong>线程2（接收者/消费者）</strong> 从缓冲区读取数据。<br>
+操作系统为此类通信提供的基本接口可能是：</li>
+<li><strong>send(message)</strong>: 如果缓冲区有空间，则插入消息；否则，阻塞调用线程直至空间可用。</li>
+<li><strong>receive()</strong>: 如果缓冲区有消息，则返回一条消息；否则，阻塞调用线程直至有消息可用。<br>
+此模型实例化了经典的<strong>生产者-消费者问题</strong>。</li>
+</ul>
+<h3 id="1-2-竞争条件：定义、成因与危害">1.2 竞争条件：定义、成因与危害</h3>
+<p><strong>竞争条件</strong>指程序的输出或结果依赖于多个并发线程执行指令的<strong>相对时序或交错顺序</strong>。</p>
+<ul>
+<li><strong>核心成因</strong>：当多个线程在没有适当同步的情况下，并发地对<strong>同一个共享变量</strong>执行“读取-修改-写入”的多步非原子操作时。</li>
+<li><strong>详细示例</strong>：<br>
+假设两个发送者线程A和B并发执行 <code>in = in + 1</code>（<code>in</code> 初始为0）。该高级语言操作通常对应多条机器指令：  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1. LOAD in, R0    // 将in的值加载到寄存器R0</span><br><span class="line">2. ADD R0, 1      // R0值加1</span><br><span class="line">3. STORE R0, in   // 将R0的值存回in</span><br></pre></td></tr></table></figure>
+可能的错误交错执行顺序：  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">时间轴： A1 (LOAD, R0_A=0) -&gt; B1 (LOAD, R0_B=0) -&gt; A2 (ADD, R0_A=1) -&gt; A3 (STORE, in=1) -&gt; B2 (ADD, R0_B=1) -&gt; B3 (STORE, in=1)</span><br><span class="line">结果：尽管两个线程都执行了加1操作，最终 `in` 的值是1而不是2。</span><br></pre></td></tr></table></figure>
+</li>
+<li><strong>危害特性</strong>：竞争条件引发的错误往往<strong>难以重现和调试</strong>，因为它依赖于极罕见且不确定的线程调度时机。</li>
+</ul>
+<h3 id="1-3-临界区与互斥原则">1.3 临界区与互斥原则</h3>
+<p>为了解决竞争条件，我们引入<strong>临界区</strong>的概念。</p>
+<ul>
+<li><strong>临界区定义</strong>：访问共享资源（变量、数据结构等）的那段代码区域。必须保证其执行具有<strong>原子性</strong>。</li>
+<li><strong>互斥访问四原则</strong>（为正确实现临界区访问提供理论框架）：
+<ol>
+<li><strong>空闲让进</strong>：当没有线程处于临界区内时，应立即允许一个请求进入的线程进入。</li>
+<li><strong>忙则等待</strong>：如果已有线程在临界区内，其他所有试图进入的线程必须在外面等待。</li>
+<li><strong>让权等待</strong>：等待进入临界区的线程应主动释放CPU（进入阻塞态），避免“忙等待”（自旋）浪费处理器资源。</li>
+<li><strong>有限等待</strong>：对任何一个提出进入请求的线程，其等待时间必须是有限的，避免“饥饿”。</li>
+</ol>
+</li>
+</ul>
+<h3 id="1-4-锁：实现互斥的基本机制">1.4 锁：实现互斥的基本机制</h3>
+<p><strong>锁</strong>（或称<strong>互斥锁</strong>）是一个共享变量，用作协调其他共享资源访问的标志。</p>
+<ul>
+<li><strong>两个基本原子操作</strong>：
+<ul>
+<li><code>acquire(lock)</code> / <code>lock()</code>: 尝试获取锁。若锁已被其他线程持有，则调用线程等待。</li>
+<li><code>release(lock)</code> / <code>unlock()</code>: 释放锁，使其他等待线程有机会获取。</li>
+</ul>
+</li>
+<li><strong>核心作用</strong>：通过用 <code>acquire</code> 和 <code>release</code> 操作包裹任意复杂的临界区代码，在逻辑上将其转换为一个原子操作。</li>
+</ul>
+<p><strong>早期有缺陷的实现尝试</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">struct lock &#123;</span><br><span class="line">    int state; // 例如，0表示UNLOCKED，1表示LOCKED</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">acquire(lock L) &#123;</span><br><span class="line">    while (L.state == LOCKED) do nothing; // 忙等待</span><br><span class="line">    L.state = LOCKED; // 标记为已锁</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">release(lock L) &#123;</span><br><span class="line">    L.state = UNLOCKED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>问题分析</strong>：<code>acquire</code> 操作本身包含对锁变量 <code>L.state</code> 的“检查-设置”多步操作，这又是一个临界区！两个线程可能同时检查到锁为 <code>UNLOCKED</code>，然后都将其设置为 <code>LOCKED</code>，从而同时进入临界区，违反了互斥原则。</p>
+<h3 id="1-5-硬件原子指令支持">1.5 硬件原子指令支持</h3>
+<p>要打破“实现锁需要原子操作，而原子操作又需要锁来实现”的循环，必须依赖<strong>硬件提供的原子指令</strong>。</p>
+<ol>
+<li>
+<p><strong>测试与设置 (Test-and-Set, TAS)</strong>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> <span class="title function_">tas</span><span class="params">(<span class="type">bool</span> *lock)</span> &#123; <span class="comment">// 假设lock指向布尔值</span></span><br><span class="line">    <span class="type">bool</span> old = *lock;  <span class="comment">// 获取旧值</span></span><br><span class="line">    *lock = <span class="literal">true</span>;      <span class="comment">// 无条件设置为true（上锁）</span></span><br><span class="line">    <span class="keyword">return</span> old;        <span class="comment">// 返回旧值</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>硬件保证</strong>：总线仲裁器确保 <code>LOAD</code>（读）和 <code>STORE</code>（写）在一个不可分割的总线周期内完成。</li>
+<li><strong>基于TAS的正确锁实现</strong>:</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">acquire(lock L) &#123;</span><br><span class="line">    while (tas(&amp;L.state) == LOCKED) ; // 如果返回旧值为“已锁”，则自旋等待</span><br><span class="line">&#125;</span><br><span class="line">release(lock L) &#123;</span><br><span class="line">    L.state = UNLOCKED; // 单一存储指令，本身是原子的</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>工作流程</strong>：<code>tas</code> 原子地返回锁的旧状态并同时将其上锁。如果返回的是 <code>UNLOCKED</code>，则调用线程成功获取锁；如果返回的是 <code>LOCKED</code>，则说明锁已被占用，线程自旋等待。</li>
+</ul>
+</li>
+<li>
+<p><strong>比较并交换 (Compare-and-Swap, CAS)</strong>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> <span class="title function_">cas</span><span class="params">(T *ptr, T expected, T new)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (*ptr == expected) &#123;</span><br><span class="line">        *ptr = new;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>; <span class="comment">// 交换成功</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>; <span class="comment">// 交换失败</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>基于CAS的锁实现</strong>:</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">acquire(lock L) &#123;</span><br><span class="line">    while (!cas(&amp;L.state, UNLOCKED, LOCKED)) ; // 期望是UNLOCKED才交换为LOCKED</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><strong>关于“禁用中断”的讨论</strong>：</p>
+<ul>
+<li><strong>在单CPU系统</strong>中，在临界区内禁用定时器中断可以防止线程被切换，从而实现原子性。</li>
+<li><strong>局限性</strong>：
+<ol>
+<li><strong>不适用于多CPU（多核）系统</strong>：禁用当前CPU的中断无法阻止其他CPU上的线程进入同一临界区。</li>
+<li><strong>安全风险</strong>：将禁用中断的权限交给用户线程是危险的。恶意或错误的用户线程可能禁用中断后不再启用，导致系统失去调度能力而崩溃。</li>
+</ol>
+</li>
+<li><strong>结论</strong>：禁用中断通常仅作为操作系统内核在特定场景下实现低级同步的一种手段，并非通用的用户级解决方案。</li>
+</ul>
+<hr>
+<h2 id="第二章：信号量">第二章：信号量</h2>
+<h3 id="2-1-从互斥到同步">2.1 从互斥到同步</h3>
+<p>互斥锁解决了<strong>竞争条件</strong>问题，但并发编程中还有另一类问题：<strong>同步</strong>。</p>
+<ul>
+<li><strong>同步定义</strong>：涉及两个或多个通信线程，一个线程需要等待另一个线程完成某项工作或达到某个状态（条件为真）后才能继续执行。</li>
+<li><strong>经典问题</strong>：生产者-消费者问题。生产者不能在缓冲区满时写入，消费者不能在缓冲区空时读取。线程间需要协调“条件”何时成立。</li>
+</ul>
+<h3 id="2-2-轮询的低效与-sleep-wakeup-原语">2.2 轮询的低效与 sleep/wakeup 原语</h3>
+<p><strong>初始的朴素解决方案（轮询/忙等待）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 生产者</span><br><span class="line">while (in - out == N) do nothing; // 缓冲区满，空转等待</span><br><span class="line">// 消费者</span><br><span class="line">while (in == out) do nothing;     // 缓冲区空，空转等待</span><br></pre></td></tr></table></figure>
+<p><strong>缺陷</strong>：持续占用CPU进行无意义的循环检查，效率极低。</p>
+<p><strong>改进思路</strong>：引入 <code>sleep()</code> 和 <code>wakeup(thread_id)</code> 原语。</p>
+<ul>
+<li><code>sleep()</code>: 将调用线程的状态从运行态改为<strong>阻塞态</strong>，使其让出CPU。</li>
+<li><code>wakeup(thread_id)</code>: 将指定线程的状态从阻塞态改为<strong>就绪态</strong>，使其有机会被调度执行。</li>
+</ul>
+<p><strong>初步使用 sleep/wakeup 的实现（存在缺陷）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 消费者 receive() 片段</span><br><span class="line">while (in == out) do</span><br><span class="line">    release(buffer_lock); // 先释放锁</span><br><span class="line">    sleep();              // 然后睡眠</span><br><span class="line">    acquire(buffer_lock); // 被唤醒后重新获取锁</span><br></pre></td></tr></table></figure>
+<p><strong>唤醒丢失问题</strong>：在消费者执行完 <code>release(buffer_lock)</code> 后、调用 <code>sleep()</code> 前的这个<strong>时间窗口</strong>内，生产者可能已经向缓冲区添加了消息并调用了 <code>wakeup(consumerThread)</code>。由于此时消费者尚未睡眠，这次唤醒信号就“丢失”了。随后消费者调用 <code>sleep()</code> 并可能永远无法被唤醒。</p>
+<ul>
+<li><strong>根源</strong>：<code>release()</code> 和 <code>sleep()</code> 不是原子操作。</li>
+<li><strong>解决思路</strong>：需要将释放锁和进入睡眠设计为一个不可分割的原子操作。这直接引出了<strong>信号量</strong>的设计。</li>
+</ul>
+<h3 id="2-3-信号量的概念与迪杰斯特拉的原语">2.3 信号量的概念与迪杰斯特拉的原语</h3>
+<p>艾兹格·迪杰斯特拉（Edsger Dijkstra）于1965年提出<strong>信号量</strong>及其两个原子操作：<code>P()</code> 和 <code>V()</code>（荷兰语缩写）。为便于理解，常称为 <code>down()</code>/<code>up()</code> 或 <code>wait()</code>/<code>signal()</code>。</p>
+<p><strong>核心思想</strong>：信号量维护一个<strong>资源计数器</strong>，并关联一个等待队列。</p>
+<ul>
+<li><strong>类比</strong>：餐厅经理管理空闲餐桌数。
+<ul>
+<li>客人到来 (<code>down</code>)：有空桌则计数减一并入座；无空桌则排队等待。</li>
+<li>客人离开 (<code>up</code>)：计数加一，并唤醒一个等待的客人入座。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-4-信号量的两种定义与实现">2.4 信号量的两种定义与实现</h3>
+<p><strong>定义一（非负整数信号量）</strong>:</p>
+<ul>
+<li>信号量 <code>s</code> 是一个非负整数。</li>
+<li><code>down(s)</code>: 如果 <code>s &gt; 0</code>，则 <code>s--</code>；否则，调用线程等待，直到另一个线程执行 <code>up(s)</code> 后再次尝试。</li>
+<li><code>up(s)</code>: <code>s++</code>，并唤醒<strong>所有</strong>正在等待该信号量的线程。</li>
+<li><strong>问题</strong>：<code>up()</code> 唤醒所有线程可能低效，且被唤醒的线程仍需竞争资源。</li>
+</ul>
+<p><strong>定义二（允许负值的信号量，更常用）</strong>:</p>
+<ul>
+<li>信号量 <code>s</code> 可为任意整数。</li>
+<li><strong>物理意义</strong>:
+<ul>
+<li><code>s &gt; 0</code>: 表示可用资源的数量。</li>
+<li><code>s = 0</code>: 表示无可用资源，且无线程等待。</li>
+<li><code>s &lt; 0</code>: 其绝对值表示正在等待该资源的线程数量。</li>
+</ul>
+</li>
+<li><strong>操作语义</strong>:
+<ul>
+<li><code>down(s)</code>: 原子地执行 <code>s--</code>。如果结果 <code>&lt; 0</code>，则将当前线程状态改为 <code>BLOCKED</code>，并加入该信号量的等待队列。</li>
+<li><code>up(s)</code>: 原子地执行 <code>s++</code>。如果结果 <code>&lt;= 0</code>（说明有线程在等待），则从其等待队列中移除一个线程，将其状态改为 <code>READY</code>，并加入就绪队列。</li>
+</ul>
+</li>
+</ul>
+<p><strong>信号量的伪代码实现（基于定义二）</strong>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">class Semaphore</span><br><span class="line">    fields:</span><br><span class="line">        count: int</span><br><span class="line">        waitingThreads: List[Thread]</span><br><span class="line"></span><br><span class="line">    method Init(initialCount: int)</span><br><span class="line">        count = initialCount</span><br><span class="line">        waitingThreads = new List[Thread]()</span><br><span class="line"></span><br><span class="line">    method Up() // 对应 V(), signal()</span><br><span class="line">        disable_interrupts() // 进入临界区，保证原子性</span><br><span class="line">        count = count + 1</span><br><span class="line">        if count &lt;= 0 // 说明有线程在等待</span><br><span class="line">            t = waitingThreads.Remove() // 从等待队列取出一个线程</span><br><span class="line">            t.status = READY</span><br><span class="line">            readyList.AddToEnd(t) // 放入就绪队列</span><br><span class="line">        enable_interrupts()</span><br><span class="line"></span><br><span class="line">    method Down() // 对应 P(), wait()</span><br><span class="line">        disable_interrupts()</span><br><span class="line">        count = count - 1</span><br><span class="line">        if count &lt; 0 // 资源不足，需要等待</span><br><span class="line">            waitingThreads.AddToEnd(currentThread)</span><br><span class="line">            currentThread.Sleep() // 阻塞当前线程</span><br><span class="line">        enable_interrupts()</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong>：<code>disable_interrupts</code>/<code>enable_interrupts</code> 是实现原子操作的一种简化方式。在实际操作系统中，可能采用更复杂的锁或硬件原子指令来保护信号量内部数据结构。</p>
+<p><strong>二元信号量</strong>：</p>
+<ul>
+<li>信号量的值只能为0或1。</li>
+<li>可以完全替代互斥锁（自旋锁）的功能，且避免了忙等待。
+<ul>
+<li><code>down()</code> 对应 <code>acquire()</code></li>
+<li><code>up()</code> 对应 <code>release()</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="2-5-使用信号量解决生产者-消费者问题">2.5 使用信号量解决生产者-消费者问题</h3>
+<p>为大小为N的缓冲区设置三个信号量：</p>
+<ul>
+<li><code>mutex</code>: 二元信号量，初始为1，用于保证对缓冲区的互斥访问（解决竞争条件）。</li>
+<li><code>empty</code>: 计数信号量，初始为N，表示空闲缓冲区单元数量。</li>
+<li><code>full</code>: 计数信号量，初始为0，表示已占用的缓冲区单元数量。</li>
+</ul>
+<p><strong>方案A（错误方案，可能导致死锁）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 生产者 send</span><br><span class="line">down(mutex)     // 1. 获取缓冲区访问权</span><br><span class="line">down(empty)     // 2. 申请一个空闲单元</span><br><span class="line">buffer[in] = msg; in = (in+1)%N</span><br><span class="line">up(full)        // 3. 增加一个已占用单元</span><br><span class="line">up(mutex)       // 4. 释放缓冲区访问权</span><br><span class="line"></span><br><span class="line">// 消费者 receive</span><br><span class="line">down(mutex)     // 1. 获取缓冲区访问权</span><br><span class="line">down(full)      // 2. 申请一个已有数据的单元</span><br><span class="line">msg = buffer[out]; out = (out+1)%N</span><br><span class="line">up(empty)       // 3. 增加一个空闲单元</span><br><span class="line">up(mutex)       // 4. 释放缓冲区访问权</span><br></pre></td></tr></table></figure>
+<p><strong>死锁场景分析</strong>：假设缓冲区已满。生产者执行步骤1 (<code>down(mutex)</code>) 成功获取 <code>mutex</code>。执行步骤2 (<code>down(empty)</code>) 时，由于 <code>empty=0</code>，生产者被阻塞在 <code>empty</code> 的等待队列中。此时，生产者仍持有 <code>mutex</code>。消费者试图执行 <code>receive</code>，第一步 <code>down(mutex)</code> 就会因为 <code>mutex</code> 被生产者持有而阻塞。双方互相等待，形成死锁。</p>
+<p><strong>方案B（正确方案）</strong>：调整 <code>down</code> 操作的顺序，<strong>先对资源信号量 (<code>empty</code>/<code>full</code>) 操作，再对互斥信号量 (<code>mutex</code>) 操作</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 生产者 send</span><br><span class="line">down(empty)     // 1. 先申请资源（空闲单元）</span><br><span class="line">down(mutex)     // 2. 再获取互斥锁</span><br><span class="line">buffer[in] = msg; in = (in+1)%N</span><br><span class="line">up(mutex)       // 3. 释放互斥锁</span><br><span class="line">up(full)        // 4. 释放资源（增加已占用单元）</span><br><span class="line"></span><br><span class="line">// 消费者 receive</span><br><span class="line">down(full)      // 1. 先申请资源（有数据的单元）</span><br><span class="line">down(mutex)     // 2. 再获取互斥锁</span><br><span class="line">msg = buffer[out]; out = (out+1)%N</span><br><span class="line">up(mutex)       // 3. 释放互斥锁</span><br><span class="line">up(empty)       // 4. 释放资源（增加空闲单元）</span><br></pre></td></tr></table></figure>
+<p><strong>正确性解释</strong>：生产者在持有 <code>mutex</code> 之前先申请 <code>empty</code>。如果缓冲区满 (<code>empty=0</code>)，生产者会在 <code>empty</code> 上阻塞，而不会持有 <code>mutex</code>。此时消费者可以正常获取 <code>mutex</code> 并消费，消费后会执行 <code>up(empty)</code> 唤醒阻塞的生产者。这避免了死锁。</p>
+<h3 id="2-6-对锁实现的改进">2.6 对锁实现的改进</h3>
+<p>基于TAS/CAS的自旋锁在锁被长期持有时会浪费大量CPU周期。更优的实现是：当 <code>acquire()</code> 发现锁已被持有时，将当前线程状态设置为 <code>BLOCKED</code>，并加入该锁的等待队列，然后让出CPU。当锁被释放时，再从等待队列中唤醒一个线程。</p>
+<ul>
+<li><strong>需要维护的数据结构</strong>：<code>waitingThreads</code>（等待线程列表）、<code>heldBy</code>（当前持有锁的线程）。</li>
+<li><strong>挑战</strong>：在实现 <code>Sleep()</code> 和 <code>Wakeup()</code> 逻辑时，仍需仔细处理竞争条件，确保正确性。这通常在操作系统内核或运行时系统的底层实现中完成（如BLITZ实验2的要求）。</li>
+</ul>
+<hr>
+<h2 id="第三章：管程与条件变量">第三章：管程与条件变量</h2>
+<h3 id="3-1-信号量的局限性与管程的引入">3.1 信号量的局限性与管程的引入</h3>
+<p>尽管信号量功能强大，但正确使用它编写程序是困难的：</p>
+<ul>
+<li><code>down()</code> 和 <code>up()</code> 的调用顺序非常微妙，容易出错。</li>
+<li>难以避免竞争条件和死锁。</li>
+<li><strong>需求</strong>：能否由编译器或编程语言提供更高级的抽象，自动生成正确的同步代码？<strong>管程</strong>应运而生。</li>
+</ul>
+<h3 id="3-2-管程的概念与特性">3.2 管程的概念与特性</h3>
+<p><strong>管程</strong>是一种高级同步构造，可视为一个特殊的“对象”或“模块”。</p>
+<ul>
+<li><strong>封装性</strong>：管程内部的共享数据只能通过其声明的<strong>入口方法</strong>进行访问，对外部隐藏实现细节。</li>
+<li><strong>互斥性</strong>：
+<ul>
+<li>每个管程关联一个<strong>互斥锁</strong>。</li>
+<li>任何线程在调用管程的入口方法时，必须首先获取该互斥锁。</li>
+<li>因此，<strong>任何时刻最多只有一个线程能在管程内部处于活动状态</strong>（即执行入口方法）。</li>
+</ul>
+</li>
+<li><strong>结构示意</strong>：  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[ 管程 ]</span><br><span class="line">+-------------------+</span><br><span class="line">| 互斥锁 (monitorLock) |</span><br><span class="line">| 共享数据 (e.g., buffer, in, out) |</span><br><span class="line">| 条件变量 (e.g., notFull, notEmpty) |</span><br><span class="line">+-------------------+</span><br><span class="line">| 入口方法1: send(...) |</span><br><span class="line">| 入口方法2: receive(...)|</span><br><span class="line">+-------------------+</span><br><span class="line">      ↑</span><br><span class="line"> [ 入口队列 ] (等待获取管程锁的线程)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="3-3-条件变量：解决管程内的同步问题">3.3 条件变量：解决管程内的同步问题</h3>
+<p>互斥锁保证了管程内一次只有一个线程，但如果这个线程发现运行条件不满足（如缓冲区空/满），它需要等待。如果它在管程内直接调用类似 <code>sleep()</code> 的操作，会因为它持有管程锁而导致其他线程永远无法进入管程来改变条件并唤醒它，造成<strong>永久阻塞</strong>。</p>
+<p><strong>条件变量</strong>是管程内部用于解决线程同步问题的机制。</p>
+<ul>
+<li><strong>本质</strong>：一个等待队列，关联一个等待条件。</li>
+<li><strong>三个核心原子操作</strong>：
+<ol>
+<li><code>wait()</code>: 调用此操作的线程<strong>释放管程锁</strong>，离开管程，并阻塞自己，进入该条件变量的等待队列。</li>
+<li><code>signal()</code>: 唤醒在该条件变量等待队列中的<strong>一个</strong>线程。被唤醒的线程将在<strong>将来某个时刻</strong>重新获取管程锁后，从 <code>wait()</code> 调用之后继续执行。</li>
+<li><code>broadcast()</code>: 唤醒在该条件变量等待队列中的<strong>所有</strong>线程。</li>
+</ol>
+</li>
+<li><strong>关键特性</strong>：<code>wait()</code> 操作<strong>原子地</strong>完成了“释放锁”和“进入睡眠”这两个动作，彻底解决了之前提到的“唤醒丢失”问题。</li>
+</ul>
+<p><strong>条件变量的伪代码实现（以BLITZ风格为例）</strong>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">class Condition</span><br><span class="line">    fields:</span><br><span class="line">        waitingThreads: List[Thread]</span><br><span class="line"></span><br><span class="line">    method Wait(mutex: ptr to Mutex)</span><br><span class="line">        disable_interrupts()</span><br><span class="line">        mutex.Unlock()              // 1. 原子地释放管程锁</span><br><span class="line">        waitingThreads.AddToEnd(currentThread) // 2. 加入等待队列</span><br><span class="line">        currentThread.Sleep()       // 3. 阻塞自身</span><br><span class="line">        mutex.Lock()                // 4. 被唤醒后，重新获取管程锁 (此步骤在唤醒后执行)</span><br><span class="line">        enable_interrupts()</span><br><span class="line"></span><br><span class="line">    method Signal(mutex: ptr to Mutex)</span><br><span class="line">        disable_interrupts()</span><br><span class="line">        t = waitingThreads.Remove() // 从队列头部取出一个线程</span><br><span class="line">        if (t != null)</span><br><span class="line">            t.status = READY</span><br><span class="line">            readyList.AddToEnd(t)   // 放入就绪队列</span><br><span class="line">        enable_interrupts()</span><br><span class="line"></span><br><span class="line">    method Broadcast(mutex: ptr to Mutex) // 唤醒所有等待线程</span><br><span class="line">        disable_interrupts()</span><br><span class="line">        while (t = waitingThreads.Remove()) != null</span><br><span class="line">            t.status = READY</span><br><span class="line">            readyList.AddToEnd(t)</span><br><span class="line">        endWhile</span><br><span class="line">        enable_interrupts()</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-管程的语义：Hoare-vs-MESA">3.4 管程的语义：Hoare vs. MESA</h3>
+<p>当管程内的线程A执行 <code>condition.signal()</code> 唤醒等待线程B时，应该立即让B执行，还是让A继续执行？这引出了两种管程语义。</p>
+<ol>
+<li>
+<p><strong>Hoare 语义</strong>（由Tony Hoare提出）：</p>
+<ul>
+<li><strong>规则</strong>：发出 <code>signal</code> 的线程A<strong>立即离开</strong>管程并等待（通常进入一个紧急队列）；被唤醒的线程B<strong>立即进入</strong>管程执行。</li>
+<li><strong>优点</strong>：线程B被唤醒时，可以<strong>确保</strong>它所等待的条件仍然成立（因为A在发出信号后没有机会改变条件）。</li>
+<li><strong>缺点</strong>：实现复杂，需要额外的上下文切换。线程A需要被保存状态，并在B退出管程后被重新调度执行。</li>
+</ul>
+</li>
+<li>
+<p><strong>MESA 语义</strong>（Java <code>synchronized</code> 块和 <code>wait()/notify()</code> 采用此语义）：</p>
+<ul>
+<li><strong>规则</strong>：发出 <code>signal</code> 的线程A<strong>继续执行</strong>，直到退出管程。被唤醒的线程B被移到管程的入口队列中，需要与其他线程竞争管程锁。</li>
+<li><strong>优点</strong>：实现更简单，上下文切换更少，并发度可能更高。</li>
+<li><strong>严重缺点</strong>：线程B被唤醒后、到它最终获得锁并重新进入管程的这段时间内，条件<strong>可能被其他线程改变而不再成立</strong>。</li>
+<li><strong>核心要求</strong>：在MESA语义下，<strong>绝对不能使用 <code>if</code> 语句检查条件，必须使用 <code>while</code> 循环</strong>。被唤醒的线程在重新获得锁后，必须再次检查条件是否成立，如果不成立，则再次调用 <code>wait()</code>。  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// MESA 语义下正确的模式</span><br><span class="line">while (!condition) &#123; // 必须用 while</span><br><span class="line">    condVar.wait();</span><br><span class="line">&#125;</span><br><span class="line">// ... 执行条件成立后的操作 ...</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-5-使用管程与条件变量解决生产者-消费者问题">3.5 使用管程与条件变量解决生产者-消费者问题</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">monitor ProducerConsumer &#123;</span><br><span class="line">    // 共享数据</span><br><span class="line">    message buffer[N];</span><br><span class="line">    int in = 0, out = 0;</span><br><span class="line">    // 条件变量</span><br><span class="line">    Condition notFull;  // 对应“缓冲区不满”条件</span><br><span class="line">    Condition notEmpty; // 对应“缓冲区不空”条件</span><br><span class="line"></span><br><span class="line">    // 入口方法</span><br><span class="line">    method send(message msg) &#123;</span><br><span class="line">        while ((in - out) == N) &#123; // MESA语义：使用 while</span><br><span class="line">            notFull.wait();</span><br><span class="line">        &#125;</span><br><span class="line">        buffer[in % N] = msg;</span><br><span class="line">        in = in + 1;</span><br><span class="line">        notEmpty.signal(); // 唤醒一个可能等待的消费者</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    method receive() returns message &#123;</span><br><span class="line">        while (in == out) &#123; // MESA语义：使用 while</span><br><span class="line">            notEmpty.wait();</span><br><span class="line">        &#125;</span><br><span class="line">        msg = buffer[out % N];</span><br><span class="line">        out = out + 1;</span><br><span class="line">        notFull.signal(); // 唤醒一个可能等待的生产者</span><br><span class="line">        return msg;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>与信号量方案的对比</strong>：管程方案将互斥（<code>mutex</code>）和资源计数（<code>empty</code>, <code>full</code>）的逻辑封装在了一起，通过条件变量 <code>wait</code>/<code>signal</code> 来表达同步关系，代码结构更清晰，更接近于高级语言思维。</p>
+<h3 id="3-6-读者-写者问题">3.6 读者-写者问题</h3>
+<ul>
+<li><strong>问题描述</strong>：多个并发线程共享一个资源（如文件、数据库）。线程分为两类：
+<ul>
+<li><strong>读者</strong>：只读取资源，不修改。</li>
+<li><strong>写者</strong>：读取并修改资源。</li>
+</ul>
+</li>
+<li><strong>核心要求</strong>：
+<ol>
+<li><strong>允许多个读者同时访问</strong>（读操作不互斥）。</li>
+<li><strong>写者必须独占访问</strong>（写操作与任何其他读/写操作互斥）。</li>
+</ol>
+</li>
+<li><strong>三种常见变体</strong>：
+<ol>
+<li><strong>读者优先</strong>：只要有一个读者正在读，后续所有读者都可以直接开始读，写者必须等待所有读者（包括新来的）结束。</li>
+<li><strong>读写公平</strong>（如使用读写锁）：读者和写者按照请求到达的FIFO顺序获得访问权。写者等待时，新读者不能插队。</li>
+<li><strong>写者优先</strong>：如果一个写者在等待，那么新到达的读者必须等待，直到所有等待的写者完成。</li>
+</ol>
+</li>
+</ul>
+<p><strong>使用信号量实现“读者优先”</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> readers;           <span class="comment">// 当前活跃的读者数量</span></span><br><span class="line">    semaphore rmutex;      <span class="comment">// 保护 readers 计数的互斥锁，初值1</span></span><br><span class="line">    semaphore wmutex;      <span class="comment">// 写锁，控制写互斥及“第一个读者/最后一个读者”，初值1</span></span><br><span class="line">&#125; <span class="type">rwlock_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">reader_lock</span><span class="params">(<span class="type">rwlock_t</span> *rw)</span> &#123;</span><br><span class="line">    down(&amp;rw-&gt;rmutex);</span><br><span class="line">    rw-&gt;readers++;</span><br><span class="line">    <span class="keyword">if</span> (rw-&gt;readers == <span class="number">1</span>) &#123;</span><br><span class="line">        down(&amp;rw-&gt;wmutex); <span class="comment">// 第一个读者需要获取写锁，阻止写者</span></span><br><span class="line">    &#125;</span><br><span class="line">    up(&amp;rw-&gt;rmutex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">reader_unlock</span><span class="params">(<span class="type">rwlock_t</span> *rw)</span> &#123;</span><br><span class="line">    down(&amp;rw-&gt;rmutex);</span><br><span class="line">    rw-&gt;readers--;</span><br><span class="line">    <span class="keyword">if</span> (rw-&gt;readers == <span class="number">0</span>) &#123;</span><br><span class="line">        up(&amp;rw-&gt;wmutex); <span class="comment">// 最后一个读者释放写锁，允许写者进入</span></span><br><span class="line">    &#125;</span><br><span class="line">    up(&amp;rw-&gt;rmutex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">writer_lock</span><span class="params">(<span class="type">rwlock_t</span> *rw)</span> &#123;</span><br><span class="line">    down(&amp;rw-&gt;wmutex); <span class="comment">// 写者直接获取写锁</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">writer_unlock</span><span class="params">(<span class="type">rwlock_t</span> *rw)</span> &#123;</span><br><span class="line">    up(&amp;rw-&gt;wmutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>工作流程</strong>：<code>wmutex</code> 作为基本的互斥锁。第一个读者获取 <code>wmutex</code>，最后一个读者释放它。这保证了：只要有读者在读，写者就无法获取 <code>wmutex</code>；当读者数为零时，写者才能获取锁进行写操作。多个读者通过 <code>rmutex</code> 安全地更新 <code>readers</code> 计数。</p>
+<h3 id="3-7-并发程序中的常见错误类型">3.7 并发程序中的常见错误类型</h3>
+<ol>
+<li><strong>原子性违反</strong>：
+<ul>
+<li><strong>表现</strong>：本应原子执行的一段代码（临界区）被并发线程交错执行。</li>
+<li><strong>示例</strong>：两个线程同时执行 <code>counter++</code> 导致结果错误。</li>
+<li><strong>修复</strong>：使用<strong>互斥锁</strong>保护临界区。</li>
+</ul>
+</li>
+<li><strong>顺序违反</strong>：
+<ul>
+<li><strong>表现</strong>：线程A假设线程B已经完成了某项操作（如初始化），但实际上B可能尚未执行或未完成。</li>
+<li><strong>示例</strong>：线程2读取线程1刚创建但尚未完全初始化的对象状态。</li>
+<li><strong>修复</strong>：使用<strong>条件变量</strong>、信号量或屏障等同步机制来明确强制操作顺序。</li>
+</ul>
+</li>
+<li><strong>死锁</strong>：
+<ul>
+<li><strong>表现</strong>：一组线程彼此循环等待对方持有的资源，导致所有线程都无法前进。</li>
+<li><strong>示例</strong>：线程1持有锁A请求锁B，线程2持有锁B请求锁A。</li>
+<li><strong>修复</strong>：
+<ul>
+<li>规定全局的、一致的<strong>锁获取顺序</strong>。</li>
+<li>使用超时机制。</li>
+<li>避免嵌套持有多个锁。</li>
+<li>使用死锁检测与恢复算法（较复杂）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="第四章：经典同步问题剖析">第四章：经典同步问题剖析</h2>
+<h3 id="4-1-哲学家就餐问题">4.1 哲学家就餐问题</h3>
+<h4 id="问题描述">问题描述</h4>
+<ul>
+<li>5位哲学家围坐圆桌，每人面前一盘意面。</li>
+<li>每两位哲学家之间有一根筷子（共5根）。</li>
+<li>哲学家行为循环：<strong>思考</strong> → <strong>拿起左右两根筷子吃饭</strong> → <strong>放下筷子</strong>。</li>
+<li>筷子是独占资源。设计算法避免死锁和饥饿，并尽可能提高并发度（允许多人同时吃）。</li>
+</ul>
+<h4 id="错误方案分析">错误方案分析</h4>
+<p><strong>方案1（直接取筷）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">philosopher(i):</span><br><span class="line">    while true:</span><br><span class="line">        think()</span><br><span class="line">        pickup_fork(i)          // 拿左筷</span><br><span class="line">        pickup_fork((i+1)%5)    // 拿右筷</span><br><span class="line">        eat()</span><br><span class="line">        putdown_fork(i)</span><br><span class="line">        putdown_fork((i+1)%5)</span><br></pre></td></tr></table></figure>
+<p><strong>问题</strong>：<strong>死锁</strong>。若所有哲学家同时拿起左筷，则每人都在等待右筷，而右筷被邻居持有，形成循环等待。</p>
+<p><strong>方案2（全局互斥）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">semaphore table = 1;</span><br><span class="line">philosopher(i):</span><br><span class="line">    while true:</span><br><span class="line">        think()</span><br><span class="line">        down(table) // 整个拿筷-吃饭-放筷过程串行化</span><br><span class="line">        pickup_forks(i)</span><br><span class="line">        eat()</span><br><span class="line">        putdown_forks(i)</span><br><span class="line">        up(table)</span><br></pre></td></tr></table></figure>
+<p><strong>问题</strong>：<strong>性能极差</strong>。任何时候只有一位哲学家能吃饭，完全丧失了并发性。</p>
+<h4 id="基于状态检查的信号量方案">基于状态检查的信号量方案</h4>
+<p><strong>核心思想</strong>：引入哲学家的<strong>状态</strong>（<code>THINKING</code>, <code>HUNGRY</code>, <code>EATING</code>）。仅当哲学家的左右邻居都不在 <code>EATING</code> 状态时，他才可以进入 <code>EATING</code> 状态。</p>
+<ul>
+<li>为每位哲学家设置一个信号量 <code>sem[i]</code>，用于在无法吃饭时阻塞。</li>
+<li>用一个互斥锁 <code>mutex</code> 保护状态数组 <code>state[5]</code>。</li>
+</ul>
+<p><strong>关键实现细节与修正</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 初始有缺陷的 pickup_forks</span><br><span class="line">pickup_forks(i):</span><br><span class="line">    down(mutex)</span><br><span class="line">    state[i] = HUNGRY</span><br><span class="line">    if (state[left] != EATING &amp;&amp; state[right] != EATING):</span><br><span class="line">        state[i] = EATING</span><br><span class="line">        up(mutex)</span><br><span class="line">    else:</span><br><span class="line">        // 问题：在此处调用 down(sem[i]) 会持有 mutex 睡眠！</span><br><span class="line">        down(sem[i]) // 这会导致死锁，因为其他线程无法进入修改状态</span><br></pre></td></tr></table></figure>
+<p><strong>修正后版本（避免持有锁睡眠）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">pickup_forks(i):</span><br><span class="line">    down(mutex)</span><br><span class="line">    state[i] = HUNGRY</span><br><span class="line">    while (state[left] == EATING || state[right] == EATING): // MESA语义用while</span><br><span class="line">        up(mutex)   // 1. 先释放锁</span><br><span class="line">        down(sem[i]) // 2. 然后在自己的信号量上阻塞</span><br><span class="line">        down(mutex) // 3. 被唤醒后重新获取锁，准备再次检查条件</span><br><span class="line">    state[i] = EATING</span><br><span class="line">    up(mutex)</span><br><span class="line"></span><br><span class="line">putdown_forks(i):</span><br><span class="line">    down(mutex)</span><br><span class="line">    state[i] = THINKING</span><br><span class="line">    // 检查左邻居是否能吃了</span><br><span class="line">    if (state[left] == HUNGRY &amp;&amp; state[left_left] != EATING &amp;&amp; state[i] != EATING):</span><br><span class="line">        // 实际上，此时state[i]刚设为THINKING，所以条件简化为检查左邻居的左右是否非EATING</span><br><span class="line">        // 更准确的实现是测试左邻居的左右是否都不是EATING</span><br><span class="line">        if (state[left_left] != EATING &amp;&amp; state[i] != EATING): // i就是左邻居的右邻居</span><br><span class="line">            state[left] = EATING</span><br><span class="line">            up(sem[left])</span><br><span class="line">    // 类似地检查右邻居...</span><br><span class="line">    up(mutex)</span><br></pre></td></tr></table></figure>
+<p><strong>注解</strong>：<code>putdown_forks</code> 中的检查逻辑是此方案最复杂部分，需要确保唤醒邻居时，该邻居的左右确实都不在吃饭状态。上述伪代码是简化示意，完整实现需仔细处理边界条件。</p>
+<h4 id="更简单的无死锁方案">更简单的无死锁方案</h4>
+<p>通过<strong>破坏循环等待</strong>条件来预防死锁。让至少一位哲学家以不同的顺序取筷子。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">semaphore forks[5] = &#123;1,1,1,1,1&#125;; // 每根筷子一个信号量</span><br><span class="line"></span><br><span class="line">pickup_forks(i):</span><br><span class="line">    if (i == 4) &#123; // 例如，让第4位哲学家（编号0-4）先拿右筷，再拿左筷</span><br><span class="line">        down(forks[(i+1) % 5]); // 先右</span><br><span class="line">        down(forks[i]);         // 后左</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        down(forks[i]);         // 先左</span><br><span class="line">        down(forks[(i+1) % 5]); // 后右</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">putdown_forks(i):</span><br><span class="line">    up(forks[i]);</span><br><span class="line">    up(forks[(i+1) % 5]);</span><br></pre></td></tr></table></figure>
+<p><strong>原理</strong>：所有哲学家都先左后右，会形成循环等待（每个都持有左等右）。让一位哲学家先右后左，就打破了循环依赖链。此方案简单有效，且允许最多两位不相邻的哲学家同时吃饭。</p>
+<h3 id="4-2-理发师睡眠问题">4.2 理发师睡眠问题</h3>
+<h4 id="问题描述-2">问题描述</h4>
+<ul>
+<li>理发店有一位理发师、一张理发椅和N张等候椅。</li>
+<li><strong>理发师</strong>：
+<ul>
+<li>若无顾客，则在理发椅上睡觉。</li>
+<li>若有顾客，则为其理发，理完后查看等候椅。</li>
+<li>若等候椅有顾客，则请下一位来理发；否则，继续睡觉。</li>
+</ul>
+</li>
+<li><strong>顾客</strong>：
+<ul>
+<li>进门后，若理发师在睡觉，则唤醒他并理发。</li>
+<li>若理发师正忙，则找空等候椅坐下等待。</li>
+<li>若无空等候椅，则离开。</li>
+</ul>
+</li>
+</ul>
+<h4 id="信号量解决方案">信号量解决方案</h4>
+<p>需要协调三类实体：理发师、顾客、座位资源。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">// 信号量与共享变量</span><br><span class="line">semaphore customers = 0;    // 等待理发的顾客数（也是唤醒理发师的信号）</span><br><span class="line">semaphore barber = 0;       // 理发师就绪信号（顾客等待此信号开始理发）</span><br><span class="line">semaphore mutex = 1;        // 保护共享变量 access_seats</span><br><span class="line">int free_seats = N;         // 空闲等候椅数量</span><br><span class="line"></span><br><span class="line">// 理发师线程</span><br><span class="line">Barber():</span><br><span class="line">    while true:</span><br><span class="line">        down(customers)     // 等待顾客，若无则阻塞（睡觉）</span><br><span class="line">        down(mutex)</span><br><span class="line">        free_seats++        // 离开一个等候椅（顾客坐上理发椅）</span><br><span class="line">        up(mutex)</span><br><span class="line">        up(barber)          // 告诉顾客“理发师准备好了”</span><br><span class="line">        cut_hair()          // 理发（临界区，但此刻只有理发师和当前顾客涉及）</span><br><span class="line"></span><br><span class="line">// 顾客线程</span><br><span class="line">Customer():</span><br><span class="line">    down(mutex)</span><br><span class="line">    if free_seats &gt; 0:</span><br><span class="line">        free_seats--        // 占用一个等候椅</span><br><span class="line">        up(mutex)</span><br><span class="line">        up(customers)       // 通知理发师有顾客（若理发师在睡则唤醒）</span><br><span class="line">        down(barber)        // 等待理发师就绪</span><br><span class="line">        get_haircut()       // 顾客被理发</span><br><span class="line">        // 理发结束，离开</span><br><span class="line">    else:</span><br><span class="line">        up(mutex)           // 没有空位，离开理发店</span><br></pre></td></tr></table></figure>
+<p><strong>扩展：控制输出顺序</strong>：若需严格按照“理发师开始理发 → 顾客被理发 → 理发师结束 → 顾客离开”的顺序打印日志，需要额外的信号量进行同步（例如 <code>semaphore haircut_done = 0</code>）。</p>
+<hr>
+<h2 id="第五章：总结">第五章：总结</h2>
+<h3 id="5-1-同步原语对比">5.1 同步原语对比</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">原语</th>
+<th style="text-align:left">核心思想</th>
+<th style="text-align:left">主要用途</th>
+<th style="text-align:left">优点</th>
+<th style="text-align:left">缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>锁 (互斥锁)</strong></td>
+<td style="text-align:left">二进制标志，实现互斥。</td>
+<td style="text-align:left">保护临界区，解决原子性违反。</td>
+<td style="text-align:left">概念简单，硬件支持高效。</td>
+<td style="text-align:left">仅解决互斥，无法表达复杂同步条件。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>信号量</strong></td>
+<td style="text-align:left">带计数的同步变量，关联等待队列。</td>
+<td style="text-align:left">解决资源分配类同步问题（如生产者-消费者），可同时实现互斥与同步。</td>
+<td style="text-align:left">功能强大、灵活。</td>
+<td style="text-align:left">使用困难，<code>down</code>/<code>up</code>顺序易错，易导致死锁。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>条件变量</strong></td>
+<td style="text-align:left">与管程锁配合使用的等待队列。</td>
+<td style="text-align:left">在管程内部，让线程等待特定条件成立。</td>
+<td style="text-align:left">与管程结合使用时代码清晰，更面向对象。</td>
+<td style="text-align:left">必须与互斥锁结合使用，不能单独使用。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>管程</strong></td>
+<td style="text-align:left">封装了数据、互斥锁和条件变量的高级抽象。</td>
+<td style="text-align:left">提供结构化、易于维护的同步代码编写方式。</td>
+<td style="text-align:left">由语言/编译器支持互斥，程序员专注条件同步，减少错误。</td>
+<td style="text-align:left">需要编程语言支持，不同的语义（Hoare/MESA）影响编程模式。</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>等价性</strong>：理论上，锁、信号量、条件变量/管程三者可以互相实现，即它们具有同等的表达能力。</li>
+<li><strong>性能考量</strong>：选择哪种原语取决于具体场景（临界区大小、竞争激烈程度、等待时间长短）。例如，短临界区可能适合自旋锁，而长等待操作则适合使用会让出CPU的信号量或条件变量。</li>
+</ul>
+<h3 id="5-2-核心问题解决模式回顾">5.2 核心问题解决模式回顾</h3>
+<ol>
+<li><strong>生产者-消费者</strong>：<strong>信号量</strong>方案使用 <code>empty</code>、<code>full</code> 进行资源计数，<code>mutex</code> 保证互斥；<strong>管程</strong>方案使用条件变量 <code>notFull</code>、<code>notEmpty</code> 进行等待/通知。</li>
+<li><strong>读者-写者</strong>：通过区分读者和写者，利用计数器实现“多读互斥、写排他”的语义。“读者优先”方案通过第一个读者加写锁、最后一个读者解读锁来实现。</li>
+<li><strong>哲学家就餐</strong>：展示了如何通过<strong>破坏循环等待</strong>（改变取筷顺序）来简单避免死锁，也展示了通过<strong>状态检查与信号量</strong>实现的更复杂但可能更公平的方案。</li>
+</ol>
+<h3 id="5-3-并发编程的挑战">5.3 并发编程的挑战</h3>
+<p>编写正确的并发程序本质上是困难的，因为它要求程序员：</p>
+<ol>
+<li>精确识别所有<strong>共享数据</strong>和<strong>临界区</strong>。</li>
+<li>为所有临界区选择合适的<strong>同步机制</strong>（锁、信号量等）。</li>
+<li>正确管理同步机制的<strong>获取与释放顺序</strong>，以避免死锁和顺序违反。</li>
+<li>在<strong>性能</strong>（并发度）与<strong>正确性</strong>之间做出权衡（如自旋等待 vs. 阻塞睡眠）。</li>
+</ol>
+<p>这份讲义系统梳理了从底层硬件原子指令到高层管程抽象的完整知识链条，并结合经典问题剖析了各类同步原语的应用与陷阱，为理解和设计并发程序提供了坚实的概念基础与实践指南。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src="/img/my_avatar.png" title="头像" alt="头像"><img class="post-copyright__author_img_front" src="/img/my_avatar.png" title="头像" alt="头像"></a><div class="post-copyright__author_name">Yuejin Wu</div><div class="post-copyright__author_desc"></div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://example.com/2026/01/02/OS_/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://example.com/2026/01/02/OS_/')">§6 同步原语 解读</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://example.com/2026/01/02/OS_/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=§6 同步原语 解读&amp;url=http://example.com/2026/01/02/OS_/&amp;pic=/img/OS_cover.png" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Yuejin's Blog</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__category-list"><a class="post-meta__box__categoryes" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"><span class="categoryes-punctuation"> <i class="anzhiyufont anzhiyu-icon-inbox"></i></span>操作系统<span class="categoryesPageCount">2</span></a></div><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/OS/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>OS<span class="tagsPageCount">2</span></a></div></div><div class="post_share"><div class="social-share" data-image="/img/OS_cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2026/01/01/OS_%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E8%B0%83%E5%BA%A6/"><img class="prev-cover" src="/img/OS_cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">§2-4 进度&amp;线程&amp;调度 简读</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2026/01/01/OS_%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E8%B0%83%E5%BA%A6/" title="§2-4 进度&amp;线程&amp;调度 简读"><img class="cover" src="/img/OS_cover.png" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2026-01-01</div><div class="title">§2-4 进度&amp;线程&amp;调度 简读</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src="/img/my_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"><div class="author-intro" style="line-height: 1.7; text-align: center; font-family: inherit; margin-top: -0.5rem; margin-bottom: 0.5rem;">
+  <p style="font-size: 1.15rem; margin-bottom: 0.8rem; font-weight: 500; color: var(--anzhiyu-fontcolor);">你好，我是 <span style="color: #00ffcc; font-weight: 600; text-shadow: 0 0 5px #00ffccaa;">Yuejin Wu</span>！👋</p>
+  <p style="font-size: 1.05rem; margin-bottom: 0.6rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">BUPT 本科生 · 人工智能专业</p>
+  <p style="font-size: 1.05rem; margin-bottom: 1rem; opacity: 0.9; color: var(--anzhiyu-fontcolor);">记录学习、思考与生活</p>
+  <p style="font-size: 1.1rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--anzhiyu-theme-op); font-weight: 600; color: #FF0066; text-shadow: 0 0 5px #FF0066, 0 0 5px #FF0066aa;">
+   保持好奇，持续探索
+  </p>
+</div>
+</div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">Yuejin Wu</h1><div class="author-info__desc"></div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/YuejinWu/YuejinWu.github.io" target="_blank" title="Github"></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8C%E6%AD%A5%E5%8E%9F%E8%AF%AD%EF%BC%9A%E4%BB%8E%E7%AB%9E%E4%BA%89%E6%9D%A1%E4%BB%B6%E5%88%B0%E7%AE%A1%E7%A8%8B%E4%B8%8E%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">操作系统同步原语：从竞争条件到管程与经典问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%9A%E7%AB%9E%E4%BA%89%E6%9D%A1%E4%BB%B6%E4%B8%8E%E4%BA%92%E6%96%A5%E5%9F%BA%E7%A1%80"><span class="toc-number">2.</span> <span class="toc-text">第一章：竞争条件与互斥基础</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E8%B7%A8%E7%BA%BF%E7%A8%8B%E9%80%9A%E4%BF%A1%E4%B8%8E%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 跨线程通信与共享内存模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E7%AB%9E%E4%BA%89%E6%9D%A1%E4%BB%B6%EF%BC%9A%E5%AE%9A%E4%B9%89%E3%80%81%E6%88%90%E5%9B%A0%E4%B8%8E%E5%8D%B1%E5%AE%B3"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 竞争条件：定义、成因与危害</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E4%B8%B4%E7%95%8C%E5%8C%BA%E4%B8%8E%E4%BA%92%E6%96%A5%E5%8E%9F%E5%88%99"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 临界区与互斥原则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E9%94%81%EF%BC%9A%E5%AE%9E%E7%8E%B0%E4%BA%92%E6%96%A5%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%9C%BA%E5%88%B6"><span class="toc-number">2.4.</span> <span class="toc-text">1.4 锁：实现互斥的基本机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-%E7%A1%AC%E4%BB%B6%E5%8E%9F%E5%AD%90%E6%8C%87%E4%BB%A4%E6%94%AF%E6%8C%81"><span class="toc-number">2.5.</span> <span class="toc-text">1.5 硬件原子指令支持</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%9A%E4%BF%A1%E5%8F%B7%E9%87%8F"><span class="toc-number">3.</span> <span class="toc-text">第二章：信号量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%BB%8E%E4%BA%92%E6%96%A5%E5%88%B0%E5%90%8C%E6%AD%A5"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 从互斥到同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E8%BD%AE%E8%AF%A2%E7%9A%84%E4%BD%8E%E6%95%88%E4%B8%8E-sleep-wakeup-%E5%8E%9F%E8%AF%AD"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 轮询的低效与 sleep&#x2F;wakeup 原语</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E8%BF%AA%E6%9D%B0%E6%96%AF%E7%89%B9%E6%8B%89%E7%9A%84%E5%8E%9F%E8%AF%AD"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 信号量的概念与迪杰斯特拉的原语</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%AE%9A%E4%B9%89%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 信号量的两种定义与实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E4%BD%BF%E7%94%A8%E4%BF%A1%E5%8F%B7%E9%87%8F%E8%A7%A3%E5%86%B3%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85%E9%97%AE%E9%A2%98"><span class="toc-number">3.5.</span> <span class="toc-text">2.5 使用信号量解决生产者-消费者问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E5%AF%B9%E9%94%81%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%94%B9%E8%BF%9B"><span class="toc-number">3.6.</span> <span class="toc-text">2.6 对锁实现的改进</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%9A%E7%AE%A1%E7%A8%8B%E4%B8%8E%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F"><span class="toc-number">4.</span> <span class="toc-text">第三章：管程与条件变量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7%E4%B8%8E%E7%AE%A1%E7%A8%8B%E7%9A%84%E5%BC%95%E5%85%A5"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 信号量的局限性与管程的引入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E7%AE%A1%E7%A8%8B%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%89%B9%E6%80%A7"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 管程的概念与特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F%EF%BC%9A%E8%A7%A3%E5%86%B3%E7%AE%A1%E7%A8%8B%E5%86%85%E7%9A%84%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 条件变量：解决管程内的同步问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E7%AE%A1%E7%A8%8B%E7%9A%84%E8%AF%AD%E4%B9%89%EF%BC%9AHoare-vs-MESA"><span class="toc-number">4.4.</span> <span class="toc-text">3.4 管程的语义：Hoare vs. MESA</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E4%BD%BF%E7%94%A8%E7%AE%A1%E7%A8%8B%E4%B8%8E%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F%E8%A7%A3%E5%86%B3%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85%E9%97%AE%E9%A2%98"><span class="toc-number">4.5.</span> <span class="toc-text">3.5 使用管程与条件变量解决生产者-消费者问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-%E8%AF%BB%E8%80%85-%E5%86%99%E8%80%85%E9%97%AE%E9%A2%98"><span class="toc-number">4.6.</span> <span class="toc-text">3.6 读者-写者问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-7-%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E4%B8%AD%E7%9A%84%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E7%B1%BB%E5%9E%8B"><span class="toc-number">4.7.</span> <span class="toc-text">3.7 并发程序中的常见错误类型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%9A%E7%BB%8F%E5%85%B8%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98%E5%89%96%E6%9E%90"><span class="toc-number">5.</span> <span class="toc-text">第四章：经典同步问题剖析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%93%B2%E5%AD%A6%E5%AE%B6%E5%B0%B1%E9%A4%90%E9%97%AE%E9%A2%98"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 哲学家就餐问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="toc-number">5.1.1.</span> <span class="toc-text">问题描述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E6%96%B9%E6%A1%88%E5%88%86%E6%9E%90"><span class="toc-number">5.1.2.</span> <span class="toc-text">错误方案分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E7%8A%B6%E6%80%81%E6%A3%80%E6%9F%A5%E7%9A%84%E4%BF%A1%E5%8F%B7%E9%87%8F%E6%96%B9%E6%A1%88"><span class="toc-number">5.1.3.</span> <span class="toc-text">基于状态检查的信号量方案</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E7%AE%80%E5%8D%95%E7%9A%84%E6%97%A0%E6%AD%BB%E9%94%81%E6%96%B9%E6%A1%88"><span class="toc-number">5.1.4.</span> <span class="toc-text">更简单的无死锁方案</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E7%90%86%E5%8F%91%E5%B8%88%E7%9D%A1%E7%9C%A0%E9%97%AE%E9%A2%98"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 理发师睡眠问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0-2"><span class="toc-number">5.2.1.</span> <span class="toc-text">问题描述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">5.2.2.</span> <span class="toc-text">信号量解决方案</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E7%AB%A0%EF%BC%9A%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">第五章：总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%90%8C%E6%AD%A5%E5%8E%9F%E8%AF%AD%E5%AF%B9%E6%AF%94"><span class="toc-number">6.1.</span> <span class="toc-text">5.1 同步原语对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%A8%A1%E5%BC%8F%E5%9B%9E%E9%A1%BE"><span class="toc-number">6.2.</span> <span class="toc-text">5.2 核心问题解决模式回顾</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E6%8C%91%E6%88%98"><span class="toc-number">6.3.</span> <span class="toc-text">5.3 并发编程的挑战</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/01/02/OS_/" title="§6 同步原语 解读"><img src="/img/OS_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§6 同步原语 解读"/></a><div class="content"><a class="title" href="/2026/01/02/OS_/" title="§6 同步原语 解读">§6 同步原语 解读</a><time datetime="2026-01-02T08:03:54.502Z" title="发表于 2026-01-02 16:03:54">2026-01-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/01/OS_%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E8%B0%83%E5%BA%A6/" title="§2-4 进度&amp;线程&amp;调度 简读"><img src="/img/OS_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§2-4 进度&amp;线程&amp;调度 简读"/></a><div class="content"><a class="title" href="/2026/01/01/OS_%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E8%B0%83%E5%BA%A6/" title="§2-4 进度&amp;线程&amp;调度 简读">§2-4 进度&amp;线程&amp;调度 简读</a><time datetime="2026-01-01T09:00:55.665Z" title="发表于 2026-01-01 17:00:55">2026-01-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_Transaction/" title="§17 Transaction 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§17 Transaction 解读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_Transaction/" title="§17 Transaction 解读">§17 Transaction 解读</a><time datetime="2025-12-27T17:32:13.329Z" title="发表于 2025-12-28 01:32:13">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§16 Query Optimization 解读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_QueryOptim/" title="§16 Query Optimization 解读">§16 Query Optimization 解读</a><time datetime="2025-12-27T17:13:55.730Z" title="发表于 2025-12-28 01:13:55">2025-12-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读"><img src="/img/C7_cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="§15 Query Processing 简读"/></a><div class="content"><a class="title" href="/2025/12/28/DB_QueryProcessing/" title="§15 Query Processing 简读">§15 Query Processing 简读</a><time datetime="2025-12-27T16:13:06.413Z" title="发表于 2025-12-28 00:13:06">2025-12-28</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2026 By <a class="footer-bar-link" href="/" title="Yuejin Wu" target="_blank">Yuejin Wu</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" href="/" title="首页">首页</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">22</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">10</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">9</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客"><img class="back-menu-item-icon" src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><i class="anzhiyufont anzhiyu-icon-paper-plane faa-tada" style="font-size: 0.9em;"></i><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/AI-Platform/" style="font-size: 0.88rem;">AI Platform<sup>1</sup></a><a href="/tags/Database/" style="font-size: 0.88rem;">Database<sup>12</sup></a><a href="/tags/English/" style="font-size: 0.88rem;">English<sup>1</sup></a><a href="/tags/OS/" style="font-size: 0.88rem;">OS<sup>2</sup></a><a href="/tags/RNN/" style="font-size: 0.88rem;">RNN<sup>1</sup></a><a href="/tags/SQL/" style="font-size: 0.88rem;">SQL<sup>6</sup></a><a href="/tags/Self-Attention/" style="font-size: 0.88rem;">Self Attention<sup>1</sup></a><a href="/tags/plan/" style="font-size: 0.88rem;">plan<sup>2</sup></a><a href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" style="font-size: 0.88rem;">关系模型<sup>1</sup></a><a href="/tags/%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B/" style="font-size: 0.88rem;">自注意力<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.7.0",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 Yuejin Wu 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://cdn.cbd.int/qrcodejs@1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
